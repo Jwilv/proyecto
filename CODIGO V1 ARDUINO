@@ -1,0 +1,94 @@
+//CONSTANTES DE DISTANCIA
+#define DISTANCIA_MIN 10 
+#define DISTANCIA_MAX_ABAJO 15
+#define DISTANCIA_MAX 400 
+//DECLARAMOS PINES DE ULTRA SONIDO
+#define PIN_TRIG_ABAJO 10 
+#define PIN_ECO_ABAJO 9
+#define PIN_TRIG_ARRIBA 11
+#define PIN_ECO_ARRIBA 12
+//PINES DEL MOTOR IZQUIERDO CON PUENTE H
+#define PIN_MOTOR_IZQUIERDO_IN1 2
+#define PIN_MOTOR_IZQUIERDO_IN2 3
+#define PIN_MOTOR_IZQUIERDO_ENA 5
+//PINES DEL MOTOR DERECHO CON PUENTE H
+#define PIN_MOTOR_DERECHO_IN1 6
+#define PIN_MOTOR_DERECHO_IN2 7
+#define PIN_MOTOR_DERECHO_ENA 8
+//INFORMACION DE DISTNCIA RECOLECTADA POR LOS SENSORES
+int DISTANCIA_ABAJO;
+int DISTANCIA_ARRIBA;
+int DURACION_ABAJO;
+int DURACION_ARRIBA;
+//INICIO DE FUNCIONES
+void setup(){
+    //PINMODE DE ULTRASONIDOS
+ pinmode(PIN_TRIG_ABAJO, OUTPUT);
+ pinmode(PIN_ECO_ABAJO, INPUT);
+ //PINMODE DE MOTOR IZQUIERDO
+ pinmode(PIN_MOTOR_IZQUIERDO_IN1, OUTPUT);
+ pinmode(PIN_MOTOR_IZQUIERDO_IN2, OUTPUT);
+ pinmode(PIN_MOTOR_IZQUIERDO_ENA, OUTPUT);  
+ //PINMODE DE MOTOR DERECHO
+ pinmode(PIN_MOTOR_DERECHO_IN1, OUTPUT);
+ pinmode(PIN_MOTOR_DERECHO_IN2, OUTPUT);
+ pinmode(PIN_MOTOR_DERECHO_ENA, OUTPUT);
+}
+
+void SENSORES(){
+digitalWrite(PIN_TRIG_ABAJO, HIGH);
+delay(1);
+digitalWrite(PIN_TRIG_ABAJO, LOW);
+DURACION_ABAJO = pulseIn(PIN_ECO_ABAJO, HIGH);
+DISTANCIA_ABAJO = DURACION_ABAJO / 58.2;
+//SENSOR DE ARRIBA:
+digitalWrite(PIN_TRIG_ARRIBA, HIGH);
+delay(1);
+digitalWrite(PIN_TRIG_ARRIBA, LOW);
+DURACION_ARRIBA = pulseIn(PIN_ECO_ARRIBA, HIGH);
+DISTANCIA_ARRIBA = DURACION_ARRIBA / 58.2;
+}
+void MOTORES_ADELANTE(){
+    //control del motor izquierdo
+    digitalWride(PIN_MOTOR_IZQUIERDO_ENA, HIGH);
+    digitalWride(PIN_MOTOR_IZQUIERDO_IN1, LOW);
+    digitalWride(PIN_MOTOR_IZQUIERDO_IN2, HIGH);
+    //control del motor DERECHO
+    digitalWride(PIN_MOTOR_DERECHO_ENA, HIGH);
+    digitalWride(PIN_MOTOR_DERECHO_IN1, LOW);
+    digitalWride(PIN_MOTOR_DERECHO_IN2, HIGH);
+}
+void MOTORES_DOBLAR_DERECHA(){
+    //control del motor izquierdo
+    digitalWride(PIN_MOTOR_IZQUIERDO_ENA, HIGH);
+    digitalWride(PIN_MOTOR_IZQUIERDO_IN1, LOW);
+    digitalWride(PIN_MOTOR_IZQUIERDO_IN2, HIGH);
+    //control del motor DERECHO
+    digitalWride(PIN_MOTOR_DERECHO_ENA, HIGH);
+    digitalWride(PIN_MOTOR_DERECHO_IN1, HIGH);
+    digitalWride(PIN_MOTOR_DERECHO_IN2, LOW);
+}
+void MOTORES_DOBLAR_IZQUIERDA(){
+    //control del motor izquierdo
+    digitalWride(PIN_MOTOR_IZQUIERDO_ENA, HIGH);
+    digitalWride(PIN_MOTOR_IZQUIERDO_IN1, HIGH);
+    digitalWride(PIN_MOTOR_IZQUIERDO_IN2, LOW);
+    //control del motor DERECHO
+    digitalWride(PIN_MOTOR_DERECHO_ENA, HIGH);
+    digitalWride(PIN_MOTOR_DERECHO_IN1, LOW);
+    digitalWride(PIN_MOTOR_DERECHO_IN2, HIGH);
+}
+
+void loop()
+{
+	void dis = void SENSORES();
+    // if de avance tomando en cuenta 2 sensores
+    if (DISTANCIA_ARRIBA <= DISTANCIA_MAX && DISTANCIA_ABAJO <= DISTANCIA_MAX_ABAJO){
+     void dis = void MOTORES_ADELANTE();   
+    }
+    else if (DISTANCIA_ARRIBA <= DISTANCIA_MIN) //else if de giro tomando en cuenta el sensor de arriba
+    {
+        void dis = void MOTORES_DOBLAR_IZQUIERDA();
+    }
+    
+}
