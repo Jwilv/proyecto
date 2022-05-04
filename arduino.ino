@@ -15,6 +15,12 @@
 #define PIN_MOTOR_DERECHO_IN1 6
 #define PIN_MOTOR_DERECHO_IN2 7
 #define PIN_MOTOR_DERECHO_ENA 8
+
+#define MOTOR_AVANZAR  0
+#define MOTOR_ATRAS 1
+
+int valor_doblar ;
+
 //INFORMACION DE DISTNCIA RECOLECTADA POR LOS sensores
 int sensor_arriba;
 int sensor_abajo;
@@ -37,56 +43,65 @@ int sensores(PIN_TRIG, PIN_ECO)
 {
     int distancia;
     int duracion;
-    int periodo 20;
-    unsigned long tiempo_actual;
-    if (millis()>tiempo_actual + periodo)
-    //SENSOR
+        //SENSOR
     digitalWrite(PIN_TRIG_, HIGH);
+    delayMicroseconds(10);
     digitalWrite(PIN_TRIG_, LOW);
+
     duracion = pulseIn(PIN_ECO_, HIGH);
     distancia = duracion / 58.2;
     return distancia;
+    
 }
 
+void motor_izq(int estado, int velocidad){
+    analogWrite(PIN_MOTOR_IZQUIERDO_ENA, velocidad);
+    if(estado == MOTOR_AVANZAR){
+        digitalWrite(PIN_MOTOR_IZQUIERDO_IN1, LOW);
+        digitalWrite(PIN_MOTOR_IZQUIERDO_IN2, HIGH);
+    }
+    else{
+         digitalWrite(PIN_MOTOR_IZQUIERDO_IN1, HIGH);
+        digitalWrite(PIN_MOTOR_IZQUIERDO_IN2, LOW);
+    }
 }
+void motor_dere(int estado, int velocidad){
+    analogWrite(PIN_MOTOR_DERECHO_ENA, velocidad);
+    if(estado == MOTOR_AVANZAR){
+        digitalWrite(PIN_MOTOR_DERECHO_IN1, LOW);
+    digitalWrite(PIN_MOTOR_DERECHO_IN2, HIGH);
+    }
+    else{
+         digitalWrite(PIN_MOTOR_DERECHO_IN1, HIGH);
+        digitalWrite(PIN_MOTOR_DERECHO_IN2, LOW);
+    }
+}
+
+
 //FUNCIOS PARA MOVER LOS MOTORES PARA ADELANTE
 void motores_adelante(){
     //control del motor izquierdo
-    analogWrite(PIN_MOTOR_IZQUIERDO_ENA, 100);
-    digitalWrite(PIN_MOTOR_IZQUIERDO_IN1, LOW);
-    digitalWrite(PIN_MOTOR_IZQUIERDO_IN2, HIGH);
-    //control del motor DERECHO
-   analogWrite(PIN_MOTOR_DERECHO_ENA, 100);
-    digitalWrite(PIN_MOTOR_DERECHO_IN1, LOW);
-    digitalWrite(PIN_MOTOR_DERECHO_IN2, HIGH);
+    motor_dere(MOTOR_AVANZAR, VELOCIDAD);
+    motor_izq(MOTOR_AVANZAR, VELOCIDAD);
+
+
 }
 //FUNCIOS DE DOBLAR A LA DERECHA INVIRTIENDO UN MOTOR
 void motores_doblar_derecha(){
     //control del motor izquierdo
-    analogWrite(PIN_MOTOR_IZQUIERDO_ENA, 100);
-    digitalWrite(PIN_MOTOR_IZQUIERDO_IN1, LOW);
-    digitalWrite(PIN_MOTOR_IZQUIERDO_IN2, HIGH);
-    //control del motor DERECHO
-   analogWrite(PIN_MOTOR_DERECHO_ENA, 100);
-    digitalWrite(PIN_MOTOR_DERECHO_IN1, HIGH);
-    digitalWrite(PIN_MOTOR_DERECHO_IN2, LOW);
+    motor_dere(MOTOR_AVANZAR, VELOCIDAD);
+    motor_izq(MOTOR_ATRAS, VELOCIDAD);
 }
 //FUNCIOS DE DOBLAR A LA IZQUIERDA INVIRTIENDO UN MOTOR
 void motores_doblar_izquierda(){
     //control del motor izquierdo
-    analogWrite(PIN_MOTOR_IZQUIERDO_ENA, 100);
-    digitalWrite(PIN_MOTOR_IZQUIERDO_IN1, HIGH);
-    digitalWrite(PIN_MOTOR_IZQUIERDO_IN2, LOW);
-    //control del motor DERECHO
-   analogWrite(PIN_MOTOR_DERECHO_ENA, 100);
-    digitalWrite(PIN_MOTOR_DERECHO_IN1, LOW);
-    digitalWrite(PIN_MOTOR_DERECHO_IN2, HIGH);
+    motor_dere(MOTOR_ATRAS, VELOCIDAD);
+    motor_izq(MOTOR_AVANZAR, VELOCIDAD);
 }
 // RECOPILACION DE FUNCIONES PARA SU MOVIMIENTO AUTONOMO 
-void movimiento_autonomo(){
+void movimiento_autonomo(int sensor_arriba, int sensor_abajo){
     //DISTANCIA DE RECOLECCION DE DATOS
-    int sensor_arriba = sensores(PIN_TRIG_ARRIBA, PIN_ECO_ARRIBA);
-    int sensor_abajo = sensores(PIN_TRIG_ABAJO, PIN_ECO_ABAJO);
+    
     //CONDICIONES PARA MOVIMIENTO AUTONOMO
     bool moverse_adelante = sensor_arriba <= DISTANCIA_MAX && sensor_abajo <= DISTANCIA_MAX_ABAJO;
     
@@ -95,8 +110,9 @@ void movimiento_autonomo(){
     }
     else if (distancia_arriba <= DISTANCIA_MIN) //else if de giro tomando en cuenta el sensor de arriba
     {
-        int valor_doblar ;
-        if (!valor-dolar %2)
+        
+        bool doblo_a_derecha = !valor_doblar%2;
+        if (doblo_a_derecha)
         {
             motores_doblar_derecha();
             valor_doblar ++;
@@ -111,5 +127,7 @@ void movimiento_autonomo(){
 //LOOP
 void loop()
 {
-    movimiento_autonomo();
+    int sensor_arriba = sensores(PIN_TRIG_ARRIBA, PIN_ECO_ARRIBA);
+    int sensor_abajo = sensores(PIN_TRIG_ABAJO, PIN_ECO_ABAJO);
+    movimiento_autonomo(sensor_arriba, sensor_abajo);
 }
