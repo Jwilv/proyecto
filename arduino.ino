@@ -19,6 +19,8 @@
 #define MOTOR_AVANZAR  0
 #define MOTOR_ATRAS 1
 
+#define VELOCIDAD 100 
+
 int valor_doblar ;
 
 //INFORMACION DE DISTNCIA RECOLECTADA POR LOS sensores
