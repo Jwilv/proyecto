@@ -8,3 +8,9 @@ inplementacon de millis
 optimizacion de la funcion de los sensores
 variedad de giro en el movimiento autonomo
 }
+
+proximas actualizaciones a alcanzar
+{
+establecer una conexion a un servidor en la nube.
+mejora de estructura de codigo y de funciones.
+}
