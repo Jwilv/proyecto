@@ -106,11 +106,11 @@ void movimiento_autonomo(int sensor_arriba, int sensor_abajo){
     
     //CONDICIONES PARA MOVIMIENTO AUTONOMO
     bool moverse_adelante = sensor_arriba <= DISTANCIA_MAX && sensor_abajo <= DISTANCIA_MAX_ABAJO;
-    
+    bool doblar = distancia_arriba <= DISTANCIA_MIN ;
     if (moverse_adelante){
         motores_adelante();  
     }
-    else if (distancia_arriba <= DISTANCIA_MIN) //else if de giro tomando en cuenta el sensor de arriba
+    else if ( doblar ) //else if de giro tomando en cuenta el sensor de arriba
     {
         
         bool doblo_a_derecha = !valor_doblar%2;
