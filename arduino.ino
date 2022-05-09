@@ -1,3 +1,16 @@
+#include <WiFi.h>
+#include <FirebaseESP32.h>
+
+#define FIREBASE_HOST "" //Sin http:// o https:// 
+#define FIREBASE_AUTH ""
+
+#define WIFI_SSID "NOMBRE_DE_LA_RED"
+#define WIFI_PASSWORD "CLAVE_DE_LA_RED"
+
+String path = "/CasaCuidadela";
+//Define un objeto de Firebase
+FirebaseData firebaseData;
+
 //CONSTANTES DE DISTANCIA
 #define DISTANCIA_MIN 10 
 #define DISTANCIA_MAX_ABAJO 15
