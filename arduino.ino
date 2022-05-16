@@ -30,8 +30,7 @@ enum estadoWalle = {
 };
 void asignacionMotores()
 {
-    // pinMode(ECHO, INPUT);
-    // pinMode(Trigger,salida);
+  
     for (int fila = 0; fila < 3; fila++)
     {
         int pinMotorIzq = pin_sensores_ultrasonido[0][fila];
