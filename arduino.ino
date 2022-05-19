@@ -1,3 +1,13 @@
+//librerias
+#include <wifi.h>
+#include <wall-e app.h>
+
+//instalar firebase client
+
+#define SSDI "XXX" //NOMBRE DE RED
+#define PASS "XXX" //PASSWORD DE RED
+#define URL "wall-e-app-default-rtdb.firebaseio.com" //URL DE FIREBASE
+#define secretbase "zHQFVPY4ZS7Ay0wrOeiWTKbhXTySFRXwKasZ0H4f" //SECRET DE FIREBASE
 // CONSTANTES DE DISTANCIA
 #define DISTANCIA_MIN 10
 #define DISTANCIA_MAX_ABAJO 15
@@ -15,6 +25,9 @@
 #define PIN_MOTOR_DERECHO_IN1 6
 #define PIN_MOTOR_DERECHO_IN2 7
 #define PIN_MOTOR_DERECHO_ENA 8
+//fire base
+firebaseData myFirebaseData;
+
 // INFORMACION DE DISTNCIA RECOLECTADA POR LOS sensores
 int sensor_arriba;
 int sensor_abajo;
@@ -30,7 +43,8 @@ enum estadoWalle = {
 };
 void asignacionMotores()
 {
-  
+    // pinMode(ECHO, INPUT);
+    // pinMode(Trigger,salida);
     for (int fila = 0; fila < 3; fila++)
     {
         int pinMotorIzq = pin_sensores_ultrasonido[0][fila];
@@ -91,7 +105,7 @@ void movimiento_autonomo()
     int sensor_abajo = sensores(PIN_TRIG_ABAJO, PIN_ECO_ABAJO);
     // CONDICIONES PARA MOVIMIENTO AUTONOMO
     bool moverse_adelante = sensor_arriba <= DISTANCIA_MAX && sensor_abajo <= DISTANCIA_MAX_ABAJO;
-    bool doblar = distancia_arriba <= DISTANCIA_MIN;
+    bool doblar = sensor_arriba <= DISTANCIA_MIN;
     if (moverse_adelante)
     {
         motoresAdelante(PIN_MOTOR_DERECHO_ENA, PIN_MOTOR_DERECHO_IN1, PIN_MOTOR_DERECHO_IN2);
