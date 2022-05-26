@@ -1,13 +1,14 @@
-//librerias
+// librerias
 #include <wifi.h>
 #include <wall-e app.h>
+#include <FirebaseESP32.h>
+//instalar libreria de wifi en caso de ser necesario 
+// instalar firebase esp32 client
 
-//instalar firebase client
-
-#define SSDI "XXX" //NOMBRE DE RED
-#define PASS "XXX" //PASSWORD DE RED
-#define URL "wall-e-app-default-rtdb.firebaseio.com" //URL DE FIREBASE
-#define secretbase "zHQFVPY4ZS7Ay0wrOeiWTKbhXTySFRXwKasZ0H4f" //SECRET DE FIREBASE
+#define SSDI "XXX"                                            // NOMBRE DE RED
+#define PASS "XXX"                                            // PASSWORD DE RED
+#define URL "wall-e-app-default-rtdb.firebaseio.com"          // URL DE FIREBASE
+#define secretbase "zHQFVPY4ZS7Ay0wrOeiWTKbhXTySFRXwKasZ0H4f" // SECRET DE FIREBASE
 // CONSTANTES DE DISTANCIA
 #define DISTANCIA_MIN 10
 #define DISTANCIA_MAX_ABAJO 15
@@ -25,45 +26,63 @@
 #define PIN_MOTOR_DERECHO_IN1 6
 #define PIN_MOTOR_DERECHO_IN2 7
 #define PIN_MOTOR_DERECHO_ENA 8
-//fire base
+// fire base
 firebaseData myFirebaseData;
 
 // INFORMACION DE DISTNCIA RECOLECTADA POR LOS sensores
 int sensor_arriba;
 int sensor_abajo;
-int estadoDeorden = 0;
 int pin_motores[2][3] = {
     {PIN_MOTOR_IZQUIERDO_ENA, PIN_MOTOR_IZQUIERDO_IN1, PIN_MOTOR_IZQUIERDO_IN2},
     {PIN_MOTOR_DERECHO_ENA, PIN_MOTOR_DERECHO_IN1, PIN_MOTOR_DERECHO_IN2}};
 enum estadoWalle = {
     ESTADO_INICIAL,
-    ESTADO_COMANDOS,
-    ESTADO_COMANDOS_VOZ,
-    ESTADO_CONTROLREMOTO,
+    ESTADO_BAILE,
+    ESTADO_QUIETO,
+    ESTADO_CONTROL_ADELANTE,
+    ESTADO_CONTROL_ATRAS,
+    ESTADO_CONTROL_IZQUIERDA,
+    ESTADO_CONTROL_DERECHA,
 };
-void asignacionMotores()
+estadoRobot = ESTADO_INICIAL;
+// tiempo de millis
+int tiempoWifi = 0;
+int periodoWifi = 500;
+void conexionWifiBaseData(int ssdi, int pass , int url, int secret)
+{
+    // CONECTAR A WIFI
+    WiFi.begin(ssdi, pass);
+    firebasae.begin(url, secret);
+    firebase.reconnectWiFi(true);
+}
+void asignacionMotores(int pin_motores_v)
 {
     // pinMode(ECHO, INPUT);
     // pinMode(Trigger,salida);
     for (int fila = 0; fila < 3; fila++)
     {
-        int pinMotorIzq = pin_sensores_ultrasonido[0][fila];
-        int pinMotorDer = pin_sensores_ultrasonido[1][fila];
+        int pinMotorIzq = pin_motores_v [0][fila];
+        int pinMotorDer = pin_motores_v [1][fila];
         pinMode(pinMotorIzq, INPUT);
         pinMode(pinMotorDer, INPUT);
     }
 }
 // INICIO DE FUNCIONES
-void pinesUltrasonido()
+void pinesUltrasonido(int trig_abajo, int eco_abajo, int trig_arriba, int eco_arriba)
 {
-    pinMode(PIN_TRIG_ABAJO, OUTPUT);
-    pinMode(PIN_ECO_ABAJO, INPUT);
+    pinMode(trig_abajo, OUTPUT);
+    pinMode(eco_abajo, INPUT);
+    pinMode(trig_arriba, OUTPUT);
+    pinMode(eco_arriba, INPUT);
 }
 void setup()
 {
     // pinMode DE ULTRASONIDOS
-    pinesUltrasonido();
-    asignacionMotores();
+    pinesUltrasonido(PIN_TRIG_ABAJO, PIN_ECO_ABAJO, PIN_TRIG_ARRIBA, PIN_ECO_ARRIBA);
+    // pin mode de motores
+    asignacionMotores(pin_motores);
+    // CONECTAR A WIFI
+    conexionWifiBaseData(SSDI, PASS, URL, secretbase);
 }
 // FUNCIOS DE RECOLECCION DE DATOS DE LOS sensores
 int sensores(int PIN_TRIG, int PIN_ECO)
@@ -96,7 +115,7 @@ void motoresAtras(int motorEna, int motorIn1, int motorIn2)
     digitalWrite(motorIn1, HIGH);
     digitalWrite(motorIn2, LOW);
 }
-// FUNCIOS DE DOBLAR A LA derecha INVIRTIENDO UN MOTOR FUNCION DE MOTOR DERECHO
+// FUNCIOn DE DOBLAR A LA derecha INVIRTIENDO UN MOTOR FUNCION DE MOTOR DERECHO
 // RECOPILACION DE FUNCIONES PARA SU MOVIMIENTO AUTONOMO
 void movimiento_autonomo()
 {
@@ -131,14 +150,37 @@ void movimiento_autonomo()
 // LOOP
 void loop()
 {
-    switch (estadoDeorden)
+    switch (estadoRobot)
     {
-    case 0:
+    case ESTADO_INICIAL:
     {
         movimiento_autonomo();
         break;
     }
-
+    case  ESTADO_BAILE:
+    {
+        break;
+    }
+     case ESTADO_QUIETO:
+    {
+        break;
+    }
+     case ESTADO_CONTROL_ADELANTE:
+    {
+        break;
+    }
+     case ESTADO_CONTROL_ATRAS:
+    {
+        break;
+    }
+     case ESTADO_CONTROL_IZQUIERDA:
+    {
+        break;
+    }
+    case ESTADO_CONTROL_DERECHA:
+    {
+        break;
+    }
     default:
     {
         break;
