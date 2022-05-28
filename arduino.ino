@@ -2,8 +2,8 @@
 #include <wifi.h>
 #include <wall-e app.h>
 #include <FirebaseESP32.h>
-//instalar libreria de wifi en caso de ser necesario 
-// instalar firebase esp32 client
+// instalar libreria de wifi en caso de ser necesario
+//  instalar firebase esp32 client
 
 #define SSDI "XXX"                                            // NOMBRE DE RED
 #define PASS "XXX"                                            // PASSWORD DE RED
@@ -32,9 +32,9 @@ firebaseData myFirebaseData;
 // INFORMACION DE DISTNCIA RECOLECTADA POR LOS sensores
 int sensor_arriba;
 int sensor_abajo;
-int pin_motores[2][3] = {
-    {PIN_MOTOR_IZQUIERDO_ENA, PIN_MOTOR_IZQUIERDO_IN1, PIN_MOTOR_IZQUIERDO_IN2},
-    {PIN_MOTOR_DERECHO_ENA, PIN_MOTOR_DERECHO_IN1, PIN_MOTOR_DERECHO_IN2}};
+int pin_motores[1] = {
+    {PIN_MOTOR_IZQUIERDO_ENA, PIN_MOTOR_IZQUIERDO_IN1, PIN_MOTOR_IZQUIERDO_IN2,
+    PIN_MOTOR_DERECHO_ENA, PIN_MOTOR_DERECHO_IN1, PIN_MOTOR_DERECHO_IN2}};
 enum estadoWalle = {
     ESTADO_INICIAL,
     ESTADO_BAILE,
@@ -42,13 +42,17 @@ enum estadoWalle = {
     ESTADO_CONTROL_ADELANTE,
     ESTADO_CONTROL_ATRAS,
     ESTADO_CONTROL_IZQUIERDA,
-    ESTADO_CONTROL_DERECHA,
+    ESTADO_CONTROL_DERECHA
 };
-estadoRobot = ESTADO_INICIAL;
+enum estadoOrden ={
+    COMANDOS = ,
+    CONTROL =
+};
+estadoRobot = ;
 // tiempo de millis
 int tiempoWifi = 0;
 int periodoWifi = 500;
-void conexionWifiBaseData(int ssdi, int pass , int url, int secret)
+void conexionWifiBaseData(int ssdi, int pass, int url, int secret)
 {
     // CONECTAR A WIFI
     WiFi.begin(ssdi, pass);
@@ -59,12 +63,10 @@ void asignacionMotores(int pin_motores_v)
 {
     // pinMode(ECHO, INPUT);
     // pinMode(Trigger,salida);
-    for (int fila = 0; fila < 3; fila++)
+    for (int fila = 0; fila < 9; fila++)
     {
-        int pinMotorIzq = pin_motores_v [0][fila];
-        int pinMotorDer = pin_motores_v [1][fila];
-        pinMode(pinMotorIzq, INPUT);
-        pinMode(pinMotorDer, INPUT);
+        int pinMotor = pin_motores_v[fila];
+        pinMode(pinMotor, INPUT);
     }
 }
 // INICIO DE FUNCIONES
@@ -147,43 +149,70 @@ void movimiento_autonomo()
         }
     }
 }
-// LOOP
-void loop()
-{
+void lecturaEstado(){
+    Firebase.get(firebase, "/CATEGORIA", estadoRobot);
+    CATEGORIA = myFireBaseData.IntData;
+    bool comandos = CATEGORIA == COMANDOS;
+    bool control = CATEGORIA == CONTROL;
+    if (comandos) estadoRobot = COMANDOS;
+    else if (control) estadoRobot = CONTROL;
+    else estadoRobot = ESTADO_QUIETO;
+}
+void lecturaComandos(){
+Firebase.get(firebase, "/COMANDOS", estadoRobot);
+    COMANDOS = myFireBaseData.IntData;
+
+}
+void 
+// FUNCIONE DE CONTROL DE MOVIMIENTO
+void controlmovimiento()
+{ // CONTROL DE MOVIMIENTO  
+    lecturaEstado();
+    lecturaComandos();
     switch (estadoRobot)
     {
-    case ESTADO_INICIAL:
+    case COMANDOS:
     {
-        movimiento_autonomo();
+        switch ()
+        {
+        case ESTADO_INICIAL:
+        {
+            movimiento_autonomo();
+            break;
+        }
+        case ESTADO_BAILE:
+        { comandoBaile();
+            break;
+        }
+        case ESTADO_QUIETO:
+        { comandoQuieto();
+            break;
+        }
+        }
+    }
+    case CONTROL:
+    {
+    case ESTADO_CONTROL_ADELANTE:
+    {   controlAdelante();
         break;
     }
-    case  ESTADO_BAILE:
-    {
+    case ESTADO_CONTROL_ATRAS:
+    {   controlAtras();
         break;
     }
-     case ESTADO_QUIETO:
-    {
-        break;
-    }
-     case ESTADO_CONTROL_ADELANTE:
-    {
-        break;
-    }
-     case ESTADO_CONTROL_ATRAS:
-    {
-        break;
-    }
-     case ESTADO_CONTROL_IZQUIERDA:
-    {
+    case ESTADO_CONTROL_IZQUIERDA:
+    {   controlIzquierda();
         break;
     }
     case ESTADO_CONTROL_DERECHA:
-    {
-        break;
-    }
-    default:
-    {
+    {  controlDerecha();
         break;
     }
     }
+    }
+}
+// LOOP
+void loop()
+{
+    cotrolmovimiento();
 }
