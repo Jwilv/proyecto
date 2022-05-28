@@ -34,21 +34,20 @@ int sensor_arriba;
 int sensor_abajo;
 int pin_motores[1] = {
     {PIN_MOTOR_IZQUIERDO_ENA, PIN_MOTOR_IZQUIERDO_IN1, PIN_MOTOR_IZQUIERDO_IN2,
-    PIN_MOTOR_DERECHO_ENA, PIN_MOTOR_DERECHO_IN1, PIN_MOTOR_DERECHO_IN2}};
+     PIN_MOTOR_DERECHO_ENA, PIN_MOTOR_DERECHO_IN1, PIN_MOTOR_DERECHO_IN2}};
 enum estadoWalle = {
     ESTADO_INICIAL,
     ESTADO_BAILE,
-    ESTADO_QUIETO,
+    ESTADO_QUIETO = 0,
     ESTADO_CONTROL_ADELANTE,
     ESTADO_CONTROL_ATRAS,
     ESTADO_CONTROL_IZQUIERDA,
-    ESTADO_CONTROL_DERECHA
-};
-enum estadoOrden ={
-    COMANDOS = ,
-    CONTROL =
-};
-estadoRobot = ;
+    ESTADO_CONTROL_DERECHA};
+enum estadoOrden = {
+    COMANDOS = 250,
+    CONTROL = 500};
+int estadoRobot;
+int estadoComando;
 // tiempo de millis
 int tiempoWifi = 0;
 int periodoWifi = 500;
@@ -149,24 +148,41 @@ void movimiento_autonomo()
         }
     }
 }
-void lecturaEstado(){
+void lecturaEstado()
+{
+    // lectura de estado de la base de datos
     Firebase.get(firebase, "/CATEGORIA", estadoRobot);
     CATEGORIA = myFireBaseData.IntData;
     bool comandos = CATEGORIA == COMANDOS;
     bool control = CATEGORIA == CONTROL;
-    if (comandos) estadoRobot = COMANDOS;
-    else if (control) estadoRobot = CONTROL;
+    if (comandos)estadoRobot = COMANDOS;
+    else if (control)estadoRobot = CONTROL;
     else estadoRobot = ESTADO_QUIETO;
 }
-void lecturaComandos(){
-Firebase.get(firebase, "/COMANDOS", estadoRobot);
+void resultadoEstado(bool estado, int valor_estado)
+{
+    if (estado)
+        estadoComando = valor_estado;
+}
+void lecturaComandos()
+{
+    Firebase.get(firebase, "/COMANDOS", estadoRobot);
     COMANDOS = myFireBaseData.IntData;
+    bool baile = ESTADO_BAILE == COMANDOS;
+    bool quieto = ESTADO_QUIETO == COMANDOS;
+    bool trompo = ESTADO_TROMPO == COMANDOS;
+    bool basura = ESTADO_BASURA == COMANDOS;
+    resultadoEstado(baile, ESTADO_BAILE);
+    resultadoEstado(quieto, ESTADO_QUIETO);
+    resultadoEstado(trompo, ESTADO_TROMPO);
+    resultadoEstado(basura, ESTADO_BASURA);
 
 }
-void 
-// FUNCIONE DE CONTROL DE MOVIMIENTO
-void controlmovimiento()
-{ // CONTROL DE MOVIMIENTO  
+void
+    // FUNCIONE DE CONTROL DE MOVIMIENTO
+    void
+    controlmovimiento()
+{ // CONTROL DE MOVIMIENTO
     lecturaEstado();
     lecturaComandos();
     switch (estadoRobot)
@@ -181,11 +197,13 @@ void controlmovimiento()
             break;
         }
         case ESTADO_BAILE:
-        { comandoBaile();
+        {
+            comandoBaile();
             break;
         }
         case ESTADO_QUIETO:
-        { comandoQuieto();
+        {
+            comandoQuieto();
             break;
         }
         }
@@ -193,19 +211,23 @@ void controlmovimiento()
     case CONTROL:
     {
     case ESTADO_CONTROL_ADELANTE:
-    {   controlAdelante();
+    {
+        controlAdelante();
         break;
     }
     case ESTADO_CONTROL_ATRAS:
-    {   controlAtras();
+    {
+        controlAtras();
         break;
     }
     case ESTADO_CONTROL_IZQUIERDA:
-    {   controlIzquierda();
+    {
+        controlIzquierda();
         break;
     }
     case ESTADO_CONTROL_DERECHA:
-    {  controlDerecha();
+    {
+        controlDerecha();
         break;
     }
     }
