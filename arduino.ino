@@ -178,9 +178,7 @@ void lecturaComandos()
     resultadoEstado(basura, ESTADO_BASURA);
 
 }
-void
     // FUNCIONE DE CONTROL DE MOVIMIENTO
-    void
     controlmovimiento()
 { // CONTROL DE MOVIMIENTO
     lecturaEstado();
