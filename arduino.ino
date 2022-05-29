@@ -36,18 +36,22 @@ int pin_motores[1] = {
     {PIN_MOTOR_IZQUIERDO_ENA, PIN_MOTOR_IZQUIERDO_IN1, PIN_MOTOR_IZQUIERDO_IN2,
      PIN_MOTOR_DERECHO_ENA, PIN_MOTOR_DERECHO_IN1, PIN_MOTOR_DERECHO_IN2}};
 enum estadoWalle = {
-    ESTADO_INICIAL,
-    ESTADO_BAILE,
-    ESTADO_QUIETO = 0,
-    ESTADO_CONTROL_ADELANTE,
-    ESTADO_CONTROL_ATRAS,
-    ESTADO_CONTROL_IZQUIERDA,
-    ESTADO_CONTROL_DERECHA};
+    ESTADO_BAILE =75,
+    ESTADO_RECOLECTAR = 100,
+    ESTADO_QUIETO = 170,
+    ESTADO_TROMPO = 150,
+    ESTADO_CONTROL_ADELANTE = 550,
+    ESTADO_CONTROL_ATRAS = 600,
+    ESTADO_CONTROL_IZQUIERDA = 700,
+    ESTADO_CONTROL_DERECHA = 650,
+    ACTIVAR_CAMARA = 750,
+    DESACTIVAR_CAMARA = 0,};
 enum estadoOrden = {
     COMANDOS = 250,
     CONTROL = 500};
 int estadoRobot;
 int estadoComando;
+int estadoCAmara ;
 // tiempo de millis
 int tiempoWifi = 0;
 int periodoWifi = 500;
@@ -118,7 +122,7 @@ void motoresAtras(int motorEna, int motorIn1, int motorIn2)
 }
 // FUNCIOn DE DOBLAR A LA derecha INVIRTIENDO UN MOTOR FUNCION DE MOTOR DERECHO
 // RECOPILACION DE FUNCIONES PARA SU MOVIMIENTO AUTONOMO
-void movimiento_autonomo()
+void estadoAutonomo()
 {
     // DISTANCIA DE RECOLECCION DE DATOS
     int sensor_arriba = sensores(PIN_TRIG_ARRIBA, PIN_ECO_ARRIBA);
@@ -153,86 +157,122 @@ void lecturaEstado()
     // lectura de estado de la base de datos
     Firebase.get(firebase, "/CATEGORIA", estadoRobot);
     CATEGORIA = myFireBaseData.IntData;
-    bool comandos = CATEGORIA == COMANDOS;
-    bool control = CATEGORIA == CONTROL;
-    if (comandos)estadoRobot = COMANDOS;
-    else if (control)estadoRobot = CONTROL;
-    else estadoRobot = ESTADO_QUIETO;
+    switch (CATEGORIA)
+    {
+    case COMANDOS:{
+        estadoRobot = COMANDOS;
+        break;
+    }
+    case CONTROL:{
+        estadoRobot = CONTROL;
+        break;
+    }
+    default:{
+        estadoRobot = default;
+        break;
+    }
+    
+    }
 }
-void resultadoEstado(bool estado, int valor_estado)
-{
-    if (estado)
-        estadoComando = valor_estado;
+
+void lecturaCamara(){
+    //lectura de estado de la camara
+    Firebase.get(firebase, "/CAMARA", estadoRobot);
+    CAMARA = myFireBaseData.IntData;
+    switch (CAMARA){
+        case ACTIVAR_CAMARA:{
+            estadoCamara = ACTIVAR_CAMARA;
+            break;
+        }
+        case DESACTIVAR_CAMARA:{
+            estadoCamara = DESACTIVAR_CAMARA;
+            break;
+        }
+    }
 }
+
 void lecturaComandos()
 {
     Firebase.get(firebase, "/COMANDOS", estadoRobot);
     COMANDOS = myFireBaseData.IntData;
-    bool baile = ESTADO_BAILE == COMANDOS;
-    bool quieto = ESTADO_QUIETO == COMANDOS;
-    bool trompo = ESTADO_TROMPO == COMANDOS;
-    bool basura = ESTADO_BASURA == COMANDOS;
-    resultadoEstado(baile, ESTADO_BAILE);
-    resultadoEstado(quieto, ESTADO_QUIETO);
-    resultadoEstado(trompo, ESTADO_TROMPO);
-    resultadoEstado(basura, ESTADO_BASURA);
+    switch (COMANDOS)
+    {
+    case ESTADO_BAILE:{
+        estadoComando = ESTADO_BAILE;
+         break;
+    }
+    case ESTADO_QUIETO:{
+        estadoComando = ESTADO_QUIETO;
+        break;
+    }
+    case ESTADO_TROMPO:{
+        estadoComando = ESTADO_TROMPO;
+        break;
+    }
+    case ESTADO_RECOLECTAR:{
+        estadoComando = ESTADO_RECOLECTAR;
+        break;
+    }
+    default:{
+        estadoComando = ESTADO_INICIAL; //chequear despues 
+        break;
+    }
+  }
+}
+
+
+void lecturaControles(){
+     Firebase.get(firebase, "/COMANDOS", estadoRobot);
+    COMANDOS = myFireBaseData.IntData;
+    switch (COMANDOS){
+        case ESTADO_CONTROL_ADELANTE:{
+            estadoControl = ESTADO_CONTROL_ADELANTE;
+            break;
+        }
+        case ESTADO_CONTROL_ATRAS:{
+            estadoControl = ESTADO_CONTROL_ATRAS;
+            break;
+        }
+        case ESTADO_CONTROL_IZQUIERDA:{
+            estadoControl = ESTADO_CONTROL_IZQUIERDA;
+            break;
+        }
+        case ESTADO_CONTROL_DERECHA:{
+            estadoControl = ESTADO_CONTROL_DERECHA;
+            break;
+        }
+    }
 
 }
-    // FUNCIONE DE CONTROL DE MOVIMIENTO
-    controlmovimiento()
-{ // CONTROL DE MOVIMIENTO
-    lecturaEstado();
-    lecturaComandos();
+
+
+void ejecucionbody(){
     switch (estadoRobot)
     {
-    case COMANDOS:
-    {
-        switch ()
-        {
-        case ESTADO_INICIAL:
-        {
-            movimiento_autonomo();
+        case COMANDOS:{
+            ejecucionComandos();
+        }
+        case CONTROL:{
+            ejecucionControl();
+        }
+        default:{
+            estadoAutonomo();
             break;
         }
-        case ESTADO_BAILE:
-        {
-            comandoBaile();
-            break;
-        }
-        case ESTADO_QUIETO:
-        {
-            comandoQuieto();
-            break;
-        }
-        }
     }
-    case CONTROL:
-    {
-    case ESTADO_CONTROL_ADELANTE:
-    {
-        controlAdelante();
-        break;
-    }
-    case ESTADO_CONTROL_ATRAS:
-    {
-        controlAtras();
-        break;
-    }
-    case ESTADO_CONTROL_IZQUIERDA:
-    {
-        controlIzquierda();
-        break;
-    }
-    case ESTADO_CONTROL_DERECHA:
-    {
-        controlDerecha();
-        break;
-    }
-    }
-    }
+
 }
+
+void ejecucionComandos(){
+
+}
+
 // LOOP
 void loop()
-{
-    cotrolmovimiento();
+{   lecturaComandos();
+    lecturaEstado();
+    lecturaCamara();
+    lecturaControles();
+    ejecucionbody();
+
 }
