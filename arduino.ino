@@ -36,7 +36,7 @@ int pin_motores[1] = {
     {PIN_MOTOR_IZQUIERDO_ENA, PIN_MOTOR_IZQUIERDO_IN1, PIN_MOTOR_IZQUIERDO_IN2,
      PIN_MOTOR_DERECHO_ENA, PIN_MOTOR_DERECHO_IN1, PIN_MOTOR_DERECHO_IN2}};
 enum estadoWalle = {
-    ESTADO_BAILE =75,
+    ESTADO_BAILE = 75,
     ESTADO_RECOLECTAR = 100,
     ESTADO_QUIETO = 170,
     ESTADO_TROMPO = 150,
@@ -45,13 +45,14 @@ enum estadoWalle = {
     ESTADO_CONTROL_IZQUIERDA = 700,
     ESTADO_CONTROL_DERECHA = 650,
     ACTIVAR_CAMARA = 750,
-    DESACTIVAR_CAMARA = 0,};
+    DESACTIVAR_CAMARA = 0,
+};
 enum estadoOrden = {
     COMANDOS = 250,
     CONTROL = 500};
 int estadoRobot;
 int estadoComando;
-int estadoCAmara ;
+int estadoCAmara;
 // tiempo de millis
 int tiempoWifi = 0;
 int periodoWifi = 500;
@@ -62,7 +63,7 @@ void conexionWifiBaseData(int ssdi, int pass, int url, int secret)
     firebasae.begin(url, secret);
     firebase.reconnectWiFi(true);
 }
-void asignacionMotores(int pin_motores_v)
+void asignacionMotores(int pin_motores_v[])
 {
     // pinMode(ECHO, INPUT);
     // pinMode(Trigger,salida);
@@ -94,7 +95,7 @@ int sensores(int PIN_TRIG, int PIN_ECO)
 {
     int distancia;
     int duracion;
-    int periodo 20;
+    int periodo = 20;
     unsigned long tiempo_actual;
     if (millis() > tiempo_actual + periodo)
     {
@@ -107,18 +108,38 @@ int sensores(int PIN_TRIG, int PIN_ECO)
     }
 }
 // FUNCIOS PARA MOVER LOS MOTORES PARA ADELANTE
-void motoresAdelante(int motorEna, int motorIn1, int motorIn2)
+void motoresAdelante(int motorEna, int motorIn1, int motorIn2, int motorEna_v, int motorIn1_v, int motorIn2_v)
 {
     analogWrite(motorEna, 100);
     digitalWrite(motorIn1, LOW);
     digitalWrite(motorIn2, HIGH);
+
+    analogWrite(motorEna_v, 100);
+    digitalWrite(motorIn1_v, LOW);
+    digitalWrite(motorIn2_v, HIGH);
 }
 // FUNCIOS DE DOBLAR A LA DERECHA INVIRTIENDO UN MOTOR FUNCION MOTOR IZQUIERDO
-void motoresAtras(int motorEna, int motorIn1, int motorIn2)
+void giroizquierda(int motorEna, int motorIn1, int motorIn2, int motorEna_v, int motorIn1_v, int motorIn2_v)
 {
     analogWrite(motorEna, 100);
     digitalWrite(motorIn1, HIGH);
     digitalWrite(motorIn2, LOW);
+
+    analogWrite(motorEna_v, 100);
+    digitalWrite(motorIn1_v, LOW);
+    digitalWrite(motorIn2_v, HIGH);
+
+    
+}
+void giroderecha(int motorEna, int motorIn1, int motorIn2, int motorEna_v, int motorIn1_v, int motorIn2_v)
+{
+    analogWrite(motorEna, 100);
+    digitalWrite(motorIn1, LOW);
+    digitalWrite(motorIn2, HIGH);
+
+    analogWrite(motorEna_v, 100);
+    digitalWrite(motorIn1_v, HIGH);
+    digitalWrite(motorIn2_v, LOW);
 }
 // FUNCIOn DE DOBLAR A LA derecha INVIRTIENDO UN MOTOR FUNCION DE MOTOR DERECHO
 // RECOPILACION DE FUNCIONES PARA SU MOVIMIENTO AUTONOMO
@@ -132,147 +153,120 @@ void estadoAutonomo()
     bool doblar = sensor_arriba <= DISTANCIA_MIN;
     if (moverse_adelante)
     {
-        motoresAdelante(PIN_MOTOR_DERECHO_ENA, PIN_MOTOR_DERECHO_IN1, PIN_MOTOR_DERECHO_IN2);
-        motoresAdelante(PIN_MOTOR_IZQUIERDO_ENA, PIN_MOTOR_IZQUIERDO_IN1, PIN_MOTOR_IZQUIERDO_IN2);
+        motoresAdelante(PIN_MOTOR_IZQUIERDO_ENA, PIN_MOTOR_IZQUIERDO_IN1, PIN_MOTOR_IZQUIERDO_IN2,PIN_MOTOR_DERECHO_ENA, PIN_MOTOR_DERECHO_IN1, PIN_MOTOR_DERECHO_IN2);
     }
     else if (doblar) // else if de giro tomando en cuenta el sensor de arriba
     {
         int valor_doblar;
         if (!valor_doblar % 2)
         {
-            motoresAdelante(PIN_MOTOR_IZQUIERDO_ENA, PIN_MOTOR_IZQUIERDO_IN1, PIN_MOTOR_IZQUIERDO_IN2);
-            motoresAtras(PIN_MOTOR_DERECHO_ENA, PIN_MOTOR_DERECHO_IN1, PIN_MOTOR_DERECHO_IN2);
+            giroizquierda(PIN_MOTOR_IZQUIERDO_ENA, PIN_MOTOR_IZQUIERDO_IN1, PIN_MOTOR_IZQUIERDO_IN2, PIN_MOTOR_DERECHO_ENA, PIN_MOTOR_DERECHO_IN1, PIN_MOTOR_DERECHO_IN2);
             valor_doblar++;
         }
         else
         {
-            motoresAtras(PIN_MOTOR_IZQUIERDO_ENA, PIN_MOTOR_IZQUIERDO_IN1, PIN_MOTOR_IZQUIERDO_IN2);
-            motoresAdelante(PIN_MOTOR_DERECHO_ENA, PIN_MOTOR_DERECHO_IN1, PIN_MOTOR_DERECHO_IN2);
+             giroderecha(PIN_MOTOR_IZQUIERDO_ENA, PIN_MOTOR_IZQUIERDO_IN1, PIN_MOTOR_IZQUIERDO_IN2, PIN_MOTOR_DERECHO_ENA, PIN_MOTOR_DERECHO_IN1, PIN_MOTOR_DERECHO_IN2);
+
             valor_doblar++;
         }
     }
 }
-void lecturaEstado()
+int lecturaCamara(int estado)
 {
-    // lectura de estado de la base de datos
-    Firebase.get(firebase, "/CATEGORIA", estadoRobot);
-    CATEGORIA = myFireBaseData.IntData;
-    switch (CATEGORIA)
+    // lectura de estado de la camara
+    Firebase.get(firebase, "/CAMARA");
+    e = myFireBaseData.IntData;
+    switch (estado)
     {
-    case COMANDOS:{
-        estadoRobot = COMANDOS;
-        break;
+    case ACTIVAR_CAMARA:
+    {
+        return ACTIVAR_CAMARA;
     }
-    case CONTROL:{
-        estadoRobot = CONTROL;
-        break;
+    case DESACTIVAR_CAMARA:
+    {
+        return DESACTIVAR_CAMARA;
     }
-    default:{
-        estadoRobot = default;
-        break;
-    }
-    
     }
 }
 
-void lecturaCamara(){
-    //lectura de estado de la camara
-    Firebase.get(firebase, "/CAMARA", estadoRobot);
-    CAMARA = myFireBaseData.IntData;
-    switch (CAMARA){
-        case ACTIVAR_CAMARA:{
-            estadoCamara = ACTIVAR_CAMARA;
-            break;
-        }
-        case DESACTIVAR_CAMARA:{
-            estadoCamara = DESACTIVAR_CAMARA;
-            break;
-        }
-    }
-}
-
-void lecturaComandos()
+int lecturaComandos()
 {
-    Firebase.get(firebase, "/COMANDOS", estadoRobot);
-    COMANDOS = myFireBaseData.IntData;
-    switch (COMANDOS)
+    Firebase.get(firebase, "/COMANDOS");
+    return COMANDOS = myFireBaseData.IntData;
+}
+
+void estandby()
+{
+}
+void camara(int estado)
+{
+    switch (estado)
     {
-    case ESTADO_BAILE:{
-        estadoComando = ESTADO_BAILE;
-         break;
-    }
-    case ESTADO_QUIETO:{
-        estadoComando = ESTADO_QUIETO;
-        break;
-    }
-    case ESTADO_TROMPO:{
-        estadoComando = ESTADO_TROMPO;
-        break;
-    }
-    case ESTADO_RECOLECTAR:{
-        estadoComando = ESTADO_RECOLECTAR;
-        break;
-    }
-    default:{
-        estadoComando = ESTADO_INICIAL; //chequear despues 
-        break;
-    }
-  }
-}
-
-
-void lecturaControles(){
-     Firebase.get(firebase, "/COMANDOS", estadoRobot);
-    COMANDOS = myFireBaseData.IntData;
-    switch (COMANDOS){
-        case ESTADO_CONTROL_ADELANTE:{
-            estadoControl = ESTADO_CONTROL_ADELANTE;
-            break;
-        }
-        case ESTADO_CONTROL_ATRAS:{
-            estadoControl = ESTADO_CONTROL_ATRAS;
-            break;
-        }
-        case ESTADO_CONTROL_IZQUIERDA:{
-            estadoControl = ESTADO_CONTROL_IZQUIERDA;
-            break;
-        }
-        case ESTADO_CONTROL_DERECHA:{
-            estadoControl = ESTADO_CONTROL_DERECHA;
-            break;
-        }
-    }
-
-}
-
-
-void ejecucionbody(){
-    switch (estadoRobot)
+    case ACTIVAR_CAMARA:
     {
-        case COMANDOS:{
-            ejecucionComandos();
-        }
-        case CONTROL:{
-            ejecucionControl();
-        }
-        default:{
-            estadoAutonomo();
-            break;
-        }
+        activarCamara();
+        break;
+    }
+    case DESACTIVAR_CAMARA:
+    {
+        desactivarCamara();
+        break;
+    }
+    }
     }
 
-}
-
-void ejecucionComandos(){
-
+void movimiento(int estado)
+{
+    switch (estado)
+    {
+    case ESTADO_CONTROL_ADELANTE:
+    {
+        avanzar();
+        estandby();
+    }
+    case ESTADO_CONTROL_ATRAS:
+    {
+        retroceder();
+        estandby();
+    }
+    case ESTADO_CONTROL_IZQUIERDA:
+    {
+        doblarIzquierda();
+        estandby();
+    }
+    case ESTADO_CONTROL_DERECHA:
+    {
+        doblarDerecha();
+        estandby();
+    }
+    case ESTADO_BAILE:
+    {
+        bailar();
+        estandby();
+        break;
+    }
+    case ESTADO_QUIETO:
+    {
+        quieto();
+        estandby();
+        break;
+    }
+    case ESTADO_TROMPO:
+    {
+        trompo();
+        estandby();
+        break;
+    }
+    case ESTADO_RECOLECTAR:
+    {
+        estadoAutonomo();
+        estandby();
+        break;
+    }
+    }
 }
 
 // LOOP
 void loop()
-{   lecturaComandos();
-    lecturaEstado();
-    lecturaCamara();
-    lecturaControles();
-    ejecucionbody();
-
+{
 }
