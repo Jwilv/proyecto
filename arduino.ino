@@ -47,9 +47,7 @@ enum estadoWalle = {
     ACTIVAR_CAMARA = 750,
     DESACTIVAR_CAMARA = 0,
 };
-int estadoRobot;
-int estadoComando;
-int estadoCAmara;
+int time
 void conexionWifiBaseData(int ssdi, int pass, int url, int secret)
 {
     // CONECTAR A WIFI
@@ -165,32 +163,16 @@ void estadoAutonomo()
         }
     }
 }
-int lecturaCamara(int estado)
+
+int lecturaComandos(string cmd)
 {
-    // lectura de estado de la camara
-    Firebase.get(firebase, "/CAMARA");
-    e = myFireBaseData.IntData;
-    switch (estado)
-    {
-    case ACTIVAR_CAMARA:
-    {
-        return ACTIVAR_CAMARA;
-    }
-    case DESACTIVAR_CAMARA:
-    {
-        return DESACTIVAR_CAMARA;
-    }
-    }
+    Firebase.get(firebase, "/cmd");
+    return myFireBaseData.IntData;
 }
 
-int lecturaComandos()
+void standby()
 {
-    Firebase.get(firebase, "/COMANDOS");
-    return COMANDOS = myFireBaseData.IntData;
-}
-
-void estandby()
-{
+    Firebase.set(myFireBaseData, "/COMANDOS", 0);
 }
 void camara(int estado)
 {
@@ -216,45 +198,45 @@ void movimiento(int estado)
     case ESTADO_CONTROL_ADELANTE:
     {
         avanzar();
-        estandby();
+        standby();
     }
     case ESTADO_CONTROL_ATRAS:
     {
         retroceder();
-        estandby();
+        standby();
     }
     case ESTADO_CONTROL_IZQUIERDA:
     {
         doblarIzquierda();
-        estandby();
+        standby();
     }
     case ESTADO_CONTROL_DERECHA:
     {
         doblarDerecha();
-        estandby();
+        standby();
     }
     case ESTADO_BAILE:
     {
         bailar();
-        estandby();
+        standby();
         break;
     }
     case ESTADO_QUIETO:
     {
         quieto();
-        estandby();
+        standby();
         break;
     }
     case ESTADO_TROMPO:
     {
         trompo();
-        estandby();
+        standby();
         break;
     }
     case ESTADO_RECOLECTAR:
     {
         estadoAutonomo();
-        estandby();
+        standby();
         break;
     }
     }
@@ -262,5 +244,8 @@ void movimiento(int estado)
 
 // LOOP
 void loop()
-{
+{ int cmdMov = lecturaComandos(COMANDOS);
+  int cmdCam = lecturaComandos(CAMARA);
+  void camara(cmdCam);
+  void movimiento(cmdMov);
 }
