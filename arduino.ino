@@ -47,15 +47,9 @@ enum estadoWalle = {
     ACTIVAR_CAMARA = 750,
     DESACTIVAR_CAMARA = 0,
 };
-enum estadoOrden = {
-    COMANDOS = 250,
-    CONTROL = 500};
 int estadoRobot;
 int estadoComando;
 int estadoCAmara;
-// tiempo de millis
-int tiempoWifi = 0;
-int periodoWifi = 500;
 void conexionWifiBaseData(int ssdi, int pass, int url, int secret)
 {
     // CONECTAR A WIFI
