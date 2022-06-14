@@ -17,18 +17,17 @@ explicacion: P_(pin),M_(motor),DER(DERECHA),IZQ(IZQUIERDA),
 #define DISTANCIA_MAX_ABAJO 15
 #define DISTANCIA_MAX 400
 // DECLARAMOS PINES DE ULTRA SONIDO
-#define PIN_TRIG_ABAJO 10
+#define P_TRIG 10
 #define PIN_ECO_ABAJO 14
-#define PIN_TRIG_ARRIBA 11
 #define PIN_ECO_ARRIBA 11
 // PINES DEL MOTOR IZQUIERDO CON PUENTE H
-#define P_M_IZQ_IN1 2
-#define P_M_IZQ_IN2 3
-#define P_M_IZQ_ENA 5
+#define P_M_IZQ_IN1 7
+#define P_M_IZQ_IN2 6
+#define P_M_IZQ_ENA 8
 // PINES DEL MOTOR DERECHO CON PUENTE H
-#define P_M_DER_IN1 6
-#define P_M_DER_IN2 7
-#define P_M_DER_ENA 8
+#define P_M_DER_IN3 5
+#define P_M_DER_IN4 4
+#define P_M_DER_ENB 3
 // fire base
 firebaseData myFirebaseData;
 
@@ -37,7 +36,7 @@ int sensor_arriba;
 int sensor_abajo;
 int pin_motores[1] = {
     {P_M_IZQ_ENA, P_M_IZQ_IN1, P_M_IZQ_IN2,
-     P_M_DER_ENA, P_M_DER_IN1, P_M_DER_IN2}};
+     P_M_DER_ENB, P_M_DER_IN3, P_M_DER_IN4}};
 enum estadoWalle = {
     ESTADO_BAILE = 75,
     ESTADO_RECOLECTAR = 100,
@@ -79,7 +78,7 @@ void pinesUltrasonido(int trig_abajo, int eco_abajo, int trig_arriba, int eco_ar
 void setup()
 {
     // pinMode DE ULTRASONIDOS
-    pinesUltrasonido(PIN_TRIG_ABAJO, PIN_ECO_ABAJO, PIN_TRIG_ARRIBA, PIN_ECO_ARRIBA);
+    pinesUltrasonido(P_TRIG, PIN_ECO_ABAJO, P_TRIG, PIN_ECO_ARRIBA);
     // pin mode de motores
     asignacionMotores(pin_motores);
     // CONECTAR A WIFI
@@ -151,26 +150,26 @@ void giroderecha(int motorEna, int motorIn1, int motorIn2, int motorEna_v, int m
 void estadoAutonomo()
 {
     // DISTANCIA DE RECOLECCION DE DATOS
-    int sensor_arriba = sensores(PIN_TRIG_ARRIBA, PIN_ECO_ARRIBA);
-    int sensor_abajo = sensores(PIN_TRIG_ABAJO, PIN_ECO_ABAJO);
+    int sensor_arriba = sensores(P_TRIG, PIN_ECO_ARRIBA);
+    int sensor_abajo = sensores(P_TRIG, PIN_ECO_ABAJO);
     // CONDICIONES PARA MOVIMIENTO AUTONOMO
     bool moverse_adelante = sensor_arriba <= DISTANCIA_MAX && sensor_abajo <= DISTANCIA_MAX_ABAJO;
     bool doblar = sensor_arriba <= DISTANCIA_MIN;
     if (moverse_adelante)
     {
-        motoresAdelante(P_M_IZQ_ENA, P_M_IZQ_IN1, P_M_IZQ_IN2,P_M_DER_ENA, P_M_DER_IN1, P_M_DER_IN2);
+        motoresAdelante(P_M_IZQ_ENA, P_M_IZQ_IN1, P_M_IZQ_IN2,P_M_DER_ENB, P_M_DER_IN3, P_M_DER_IN4);
     }
     else if (doblar) // else if de giro tomando en cuenta el sensor de arriba
     {
         int valor_doblar;
         if (!valor_doblar % 2)
         {
-            giroizquierda(P_M_IZQ_ENA, P_M_IZQ_IN1, P_M_IZQ_IN2, P_M_DER_ENA, P_M_DER_IN1, P_M_DER_IN2);
+            giroizquierda(P_M_IZQ_ENA, P_M_IZQ_IN1, P_M_IZQ_IN2, P_M_DER_ENB, P_M_DER_IN3, P_M_DER_IN4);
             valor_doblar++;
         }
         else
         {
-             giroderecha(P_M_IZQ_ENA, P_M_IZQ_IN1, P_M_IZQ_IN2, P_M_DER_ENA, P_M_DER_IN1, P_M_DER_IN2);
+             giroderecha(P_M_IZQ_ENA, P_M_IZQ_IN1, P_M_IZQ_IN2, P_M_DER_ENB, P_M_DER_IN3, P_M_DER_IN4);
 
             valor_doblar++;
         }
@@ -195,22 +194,22 @@ void movimiento(int estado)
     {
     case ESTADO_CONTROL_ADELANTE:
     {
-        motoresAdelante(P_M_IZQ_ENA, P_M_IZQ_IN1, P_M_IZQ_IN2,P_M_DER_ENA, P_M_DER_IN1, P_M_DER_IN2);
+        motoresAdelante(P_M_IZQ_ENA, P_M_IZQ_IN1, P_M_IZQ_IN2,P_M_DER_ENB, P_M_DER_IN3, P_M_DER_IN4);
         standby();
     }
     case ESTADO_CONTROL_ATRAS:
     {
-        motoresAtras(P_M_IZQ_ENA, P_M_IZQ_IN1, P_M_IZQ_IN2,P_M_DER_ENA, P_M_DER_IN1, P_M_DER_IN2);
+        motoresAtras(P_M_IZQ_ENA, P_M_IZQ_IN1, P_M_IZQ_IN2,P_M_DER_ENB, P_M_DER_IN3, P_M_DER_IN4);
         standby();
     }
     case ESTADO_CONTROL_IZQUIERDA:
     {
-        giroizquierda(P_M_IZQ_ENA, P_M_IZQ_IN1, P_M_IZQ_IN2, P_M_DER_ENA, P_M_DER_IN1, P_M_DER_IN2);
+        giroizquierda(P_M_IZQ_ENA, P_M_IZQ_IN1, P_M_IZQ_IN2, P_M_DER_ENB, P_M_DER_IN3, P_M_DER_IN4);
         standby();
     }
     case ESTADO_CONTROL_DERECHA:
     {
-        giroderecha(P_M_IZQ_ENA, P_M_IZQ_IN1, P_M_IZQ_IN2, P_M_DER_ENA, P_M_DER_IN1, P_M_DER_IN2);
+        giroderecha(P_M_IZQ_ENA, P_M_IZQ_IN1, P_M_IZQ_IN2, P_M_DER_ENB, P_M_DER_IN3, P_M_DER_IN4);
         standby();
     }
     case ESTADO_BAILE:
