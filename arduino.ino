@@ -4,6 +4,9 @@
 #include <FirebaseESP32.h>
 // instalar libreria de wifi en caso de ser necesario
 //  instalar firebase esp32 client
+/*
+explicacion: P_(pin),M_(motor),DER(DERECHA),IZQ(IZQUIERDA),
+*/
 
 #define SSDI "XXX"                                            // NOMBRE DE RED
 #define PASS "XXX"                                            // PASSWORD DE RED
@@ -19,13 +22,13 @@
 #define PIN_TRIG_ARRIBA 11
 #define PIN_ECO_ARRIBA 11
 // PINES DEL MOTOR IZQUIERDO CON PUENTE H
-#define PIN_MOTOR_IZQUIERDO_IN1 2
-#define PIN_MOTOR_IZQUIERDO_IN2 3
-#define PIN_MOTOR_IZQUIERDO_ENA 5
+#define P_M_IZQ_IN1 2
+#define P_M_IZQ_IN2 3
+#define P_M_IZQ_ENA 5
 // PINES DEL MOTOR DERECHO CON PUENTE H
-#define PIN_MOTOR_DERECHO_IN1 6
-#define PIN_MOTOR_DERECHO_IN2 7
-#define PIN_MOTOR_DERECHO_ENA 8
+#define P_M_DER_IN1 6
+#define P_M_DER_IN2 7
+#define P_M_DER_ENA 8
 // fire base
 firebaseData myFirebaseData;
 
@@ -33,8 +36,8 @@ firebaseData myFirebaseData;
 int sensor_arriba;
 int sensor_abajo;
 int pin_motores[1] = {
-    {PIN_MOTOR_IZQUIERDO_ENA, PIN_MOTOR_IZQUIERDO_IN1, PIN_MOTOR_IZQUIERDO_IN2,
-     PIN_MOTOR_DERECHO_ENA, PIN_MOTOR_DERECHO_IN1, PIN_MOTOR_DERECHO_IN2}};
+    {P_M_IZQ_ENA, P_M_IZQ_IN1, P_M_IZQ_IN2,
+     P_M_DER_ENA, P_M_DER_IN1, P_M_DER_IN2}};
 enum estadoWalle = {
     ESTADO_BAILE = 75,
     ESTADO_RECOLECTAR = 100,
@@ -110,6 +113,16 @@ void motoresAdelante(int motorEna, int motorIn1, int motorIn2, int motorEna_v, i
     digitalWrite(motorIn1_v, LOW);
     digitalWrite(motorIn2_v, HIGH);
 }
+void motoresAtras(int motorEna, int motorIn1, int motorIn2, int motorEna_v, int motorIn1_v, int motorIn2_v)
+{
+    analogWrite(motorEna, 100);
+    digitalWrite(motorIn1, HIGH);
+    digitalWrite(motorIn2, LOW);
+
+    analogWrite(motorEna_v, 100);
+    digitalWrite(motorIn1_v, HIGH);
+    digitalWrite(motorIn2_v, LOW);
+}
 // FUNCIOS DE DOBLAR A LA DERECHA INVIRTIENDO UN MOTOR FUNCION MOTOR IZQUIERDO
 void giroizquierda(int motorEna, int motorIn1, int motorIn2, int motorEna_v, int motorIn1_v, int motorIn2_v)
 {
@@ -145,19 +158,19 @@ void estadoAutonomo()
     bool doblar = sensor_arriba <= DISTANCIA_MIN;
     if (moverse_adelante)
     {
-        motoresAdelante(PIN_MOTOR_IZQUIERDO_ENA, PIN_MOTOR_IZQUIERDO_IN1, PIN_MOTOR_IZQUIERDO_IN2,PIN_MOTOR_DERECHO_ENA, PIN_MOTOR_DERECHO_IN1, PIN_MOTOR_DERECHO_IN2);
+        motoresAdelante(P_M_IZQ_ENA, P_M_IZQ_IN1, P_M_IZQ_IN2,P_M_DER_ENA, P_M_DER_IN1, P_M_DER_IN2);
     }
     else if (doblar) // else if de giro tomando en cuenta el sensor de arriba
     {
         int valor_doblar;
         if (!valor_doblar % 2)
         {
-            giroizquierda(PIN_MOTOR_IZQUIERDO_ENA, PIN_MOTOR_IZQUIERDO_IN1, PIN_MOTOR_IZQUIERDO_IN2, PIN_MOTOR_DERECHO_ENA, PIN_MOTOR_DERECHO_IN1, PIN_MOTOR_DERECHO_IN2);
+            giroizquierda(P_M_IZQ_ENA, P_M_IZQ_IN1, P_M_IZQ_IN2, P_M_DER_ENA, P_M_DER_IN1, P_M_DER_IN2);
             valor_doblar++;
         }
         else
         {
-             giroderecha(PIN_MOTOR_IZQUIERDO_ENA, PIN_MOTOR_IZQUIERDO_IN1, PIN_MOTOR_IZQUIERDO_IN2, PIN_MOTOR_DERECHO_ENA, PIN_MOTOR_DERECHO_IN1, PIN_MOTOR_DERECHO_IN2);
+             giroderecha(P_M_IZQ_ENA, P_M_IZQ_IN1, P_M_IZQ_IN2, P_M_DER_ENA, P_M_DER_IN1, P_M_DER_IN2);
 
             valor_doblar++;
         }
@@ -174,22 +187,7 @@ void standby()
 {
     Firebase.set(myFireBaseData, "/COMANDOS", 0);
 }
-void camara(int estado)
-{
-    switch (estado)
-    {
-    case ACTIVAR_CAMARA:
-    {
-        activarCamara();
-        break;
-    }
-    case DESACTIVAR_CAMARA:
-    {
-        desactivarCamara();
-        break;
-    }
-    }
-    }
+
 
 void movimiento(int estado)
 {
@@ -197,22 +195,22 @@ void movimiento(int estado)
     {
     case ESTADO_CONTROL_ADELANTE:
     {
-        avanzar();
+        motoresAdelante(P_M_IZQ_ENA, P_M_IZQ_IN1, P_M_IZQ_IN2,P_M_DER_ENA, P_M_DER_IN1, P_M_DER_IN2);
         standby();
     }
     case ESTADO_CONTROL_ATRAS:
     {
-        retroceder();
+        motoresAtras(P_M_IZQ_ENA, P_M_IZQ_IN1, P_M_IZQ_IN2,P_M_DER_ENA, P_M_DER_IN1, P_M_DER_IN2);
         standby();
     }
     case ESTADO_CONTROL_IZQUIERDA:
     {
-        doblarIzquierda();
+        giroizquierda(P_M_IZQ_ENA, P_M_IZQ_IN1, P_M_IZQ_IN2, P_M_DER_ENA, P_M_DER_IN1, P_M_DER_IN2);
         standby();
     }
     case ESTADO_CONTROL_DERECHA:
     {
-        doblarDerecha();
+        giroderecha(P_M_IZQ_ENA, P_M_IZQ_IN1, P_M_IZQ_IN2, P_M_DER_ENA, P_M_DER_IN1, P_M_DER_IN2);
         standby();
     }
     case ESTADO_BAILE:
@@ -223,7 +221,6 @@ void movimiento(int estado)
     }
     case ESTADO_QUIETO:
     {
-        quieto();
         standby();
         break;
     }
@@ -245,7 +242,5 @@ void movimiento(int estado)
 // LOOP
 void loop()
 { int cmdMov = lecturaComandos(COMANDOS);
-  int cmdCam = lecturaComandos(CAMARA);
-  void camara(cmdCam);
   void movimiento(cmdMov);
 }
