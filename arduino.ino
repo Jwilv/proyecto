@@ -59,8 +59,6 @@ void conexionWifiBaseData(int ssdi, int pass, int url, int secret)
 }
 void asignacionMotores(int pin_motores_v[])
 {
-    // pinMode(ECHO, INPUT);
-    // pinMode(Trigger,salida);
     for (int fila = 0; fila < 9; fila++)
     {
         int pinMotor = pin_motores_v[fila];
@@ -68,17 +66,16 @@ void asignacionMotores(int pin_motores_v[])
     }
 }
 // INICIO DE FUNCIONES
-void pinesUltrasonido(int trig_abajo, int eco_abajo, int trig_arriba, int eco_arriba)
+void pinesUltrasonido(int trig, int eco_abajo, int eco_arriba)
 {
-    pinMode(trig_abajo, OUTPUT);
+    pinMode(trig, OUTPUT);
     pinMode(eco_abajo, INPUT);
-    pinMode(trig_arriba, OUTPUT);
     pinMode(eco_arriba, INPUT);
 }
 void setup()
 {
     // pinMode DE ULTRASONIDOS
-    pinesUltrasonido(P_TRIG, PIN_ECO_ABAJO, P_TRIG, PIN_ECO_ARRIBA);
+    pinesUltrasonido(P_TRIG, PIN_ECO_ABAJO, PIN_ECO_ARRIBA);
     // pin mode de motores
     asignacionMotores(pin_motores);
     // CONECTAR A WIFI
