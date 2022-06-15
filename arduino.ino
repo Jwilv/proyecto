@@ -34,7 +34,7 @@ firebaseData myFirebaseData;
 // INFORMACION DE DISTNCIA RECOLECTADA POR LOS sensores
 int sensor_arriba;
 int sensor_abajo;
-int pin_motores[1] = {
+int pin_motores[5] = {
     {P_M_IZQ_ENA, P_M_IZQ_IN1, P_M_IZQ_IN2,
      P_M_DER_ENB, P_M_DER_IN3, P_M_DER_IN4}};
 enum estadoWalle = {
@@ -59,7 +59,7 @@ void conexionWifiBaseData(int ssdi, int pass, int url, int secret)
 }
 void asignacionMotores(int pin_motores_v[])
 {
-    for (int fila = 0; fila < 9; fila++)
+    for (int fila = 0; fila < 5; fila++)
     {
         int pinMotor = pin_motores_v[fila];
         pinMode(pinMotor, INPUT);
