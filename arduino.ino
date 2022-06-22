@@ -34,9 +34,12 @@ firebaseData myFirebaseData;
 // INFORMACION DE DISTNCIA RECOLECTADA POR LOS sensores
 int sensor_arriba;
 int sensor_abajo;
-int pin_motores[5] = {
+int tiempoAc = 0;
+int periodo4 = 4000;
+int periodo2 = 2000;
+int pin_motores[5] = 
     {P_M_IZQ_ENA, P_M_IZQ_IN1, P_M_IZQ_IN2,
-     P_M_DER_ENB, P_M_DER_IN3, P_M_DER_IN4}};
+     P_M_DER_ENB, P_M_DER_IN3, P_M_DER_IN4};
 enum estadoWalle = {
     ESTADO_BAILE = 75,
     ESTADO_RECOLECTAR = 100,
@@ -192,27 +195,42 @@ void movimiento(int estado)
     case ESTADO_CONTROL_ADELANTE:
     {
         motoresAdelante(P_M_IZQ_ENA, P_M_IZQ_IN1, P_M_IZQ_IN2,P_M_DER_ENB, P_M_DER_IN3, P_M_DER_IN4);
-        standby();
+        if(millis() - tiempoAc > periodo2)
+        {   tiempoAc = millis();
+            standby();
+        }
     }
     case ESTADO_CONTROL_ATRAS:
     {
         motoresAtras(P_M_IZQ_ENA, P_M_IZQ_IN1, P_M_IZQ_IN2,P_M_DER_ENB, P_M_DER_IN3, P_M_DER_IN4);
-        standby();
+       if(millis() - tiempoAc > periodo2)
+        {   tiempoAc = millis();
+            standby();
+        }
     }
     case ESTADO_CONTROL_IZQUIERDA:
     {
         giroizquierda(P_M_IZQ_ENA, P_M_IZQ_IN1, P_M_IZQ_IN2, P_M_DER_ENB, P_M_DER_IN3, P_M_DER_IN4);
-        standby();
+        if(millis() - tiempoAc > periodo2)
+        {   tiempoAc = millis();
+            standby();
+        }
     }
     case ESTADO_CONTROL_DERECHA:
     {
         giroderecha(P_M_IZQ_ENA, P_M_IZQ_IN1, P_M_IZQ_IN2, P_M_DER_ENB, P_M_DER_IN3, P_M_DER_IN4);
-        standby();
+        if(millis() - tiempoAc > periodo2)
+        {   tiempoAc = millis();
+            standby();
+        }
     }
     case ESTADO_BAILE:
     {
         bailar();
-        standby();
+        if(millis() - tiempoAc > periodo4)
+        {   tiempoAc = millis();
+            standby();
+        }
         break;
     }
     case ESTADO_QUIETO:
@@ -223,17 +241,20 @@ void movimiento(int estado)
     case ESTADO_TROMPO:
     {
         trompo();
-        standby();
+        if(millis() - tiempoAc > periodo4)
+        {   tiempoAc = millis();
+            standby();
+        }
         break;
     }
     case ESTADO_RECOLECTAR:
     {
         estadoAutonomo();
-        standby();
         break;
     }
     }
 }
+
 
 // LOOP
 void loop()
