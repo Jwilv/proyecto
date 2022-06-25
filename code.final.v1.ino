@@ -26,6 +26,13 @@ explicacion: P_(pin),M_(motor),DER(DERECHA),IZQ(IZQUIERDA),
 #define P_M_DER_IN3 5
 #define P_M_DER_IN4 4
 #define P_M_DER_ENB 3
+// pin servo
+#define SERVO 14
+// pwm
+int frecuencia = 5000; // frecuencia del pwm
+int canal0 = 0;        // canal pwm para el servo motor
+int canal1 = 1;        // canal pwm para el motor
+int Rmotor = 100;      // resolucion motor
 // fire base
 firebaseData myFirebaseData;
 
@@ -35,9 +42,9 @@ int sensor_abajo;
 int tiempoAc = 0;
 int periodo4 = 4000;
 int periodo2 = 2000;
-int pin_motores[5] = {
+int pin_motores[5] =
     {P_M_IZQ_ENA, P_M_IZQ_IN1, P_M_IZQ_IN2,
-     P_M_DER_ENB, P_M_DER_IN3, P_M_DER_IN4}};
+     P_M_DER_ENB, P_M_DER_IN3, P_M_DER_IN4};
 enum estadoWalle = {
     ESTADO_BAILE = 75,
     ESTADO_RECOLECTAR = 100,
@@ -57,6 +64,15 @@ void conexionWifiBaseData(int ssdi, int pass, int url, int secret)
     WiFi.begin(ssdi, pass);
     firebasae.begin(url, secret);
     firebase.reconnectWiFi(true);
+}
+void DeclaracionPwm()
+{
+    EnaSetup(canal1, frecuencia, Rmotor);
+    EnbSetup(canal1, frecuencia, Rmotor);
+    ServoSetup(canal0, frecuencia, Rmotor);
+    Ena.AttachPin(P_M_IZQ_ENA, canal1);
+    Enb.AttachPin(P_M_DER_ENB, canal1);
+    Servo.AttachPin(SERVO, canal0);
 }
 void asignacionMotores(int pin_motores_v[])
 {
@@ -104,42 +120,42 @@ int Sensores(int PIN_TRIG, int PIN_ECO)
 // FUNCIOS PARA MOVER LOS MOTORES PARA ADELANTE
 void motoresAdelante(int motorEna, int motorIn1, int motorIn2, int motorEna_v, int motorIn1_v, int motorIn2_v)
 {
-    analogWrite(motorEna, 100);
+    EnaWrite(motorEna, Rmotor);
     digitalWrite(motorIn1, LOW);
     digitalWrite(motorIn2, HIGH);
 
-    analogWrite(motorEna_v, 100);
+    EnbgWrite(motorEna_v, Rmotor);
     digitalWrite(motorIn1_v, LOW);
     digitalWrite(motorIn2_v, HIGH);
 }
 void motoresAtras(int motorEna, int motorIn1, int motorIn2, int motorEna_v, int motorIn1_v, int motorIn2_v)
 {
-    analogWrite(motorEna, 100);
+    EnaWrite(motorEna, Rmotor);
     digitalWrite(motorIn1, HIGH);
     digitalWrite(motorIn2, LOW);
 
-    analogWrite(motorEna_v, 100);
+    EnbgWrite(motorEna_v, Rmotor);
     digitalWrite(motorIn1_v, HIGH);
     digitalWrite(motorIn2_v, LOW);
 }
 // FUNCIOS DE DOBLAR A LA DERECHA INVIRTIENDO UN MOTOR FUNCION MOTOR IZQUIERDO
 void giroizquierda(int motorEna, int motorIn1, int motorIn2, int motorEna_v, int motorIn1_v, int motorIn2_v)
 {
-    analogWrite(motorEna, 100);
+    EnaWrite(motorEna, Rmotor);
     digitalWrite(motorIn1, HIGH);
     digitalWrite(motorIn2, LOW);
 
-    analogWrite(motorEna_v, 100);
+    EnbgWrite(motorEna_v, Rmotor);
     digitalWrite(motorIn1_v, LOW);
     digitalWrite(motorIn2_v, HIGH);
 }
 void giroderecha(int motorEna, int motorIn1, int motorIn2, int motorEna_v, int motorIn1_v, int motorIn2_v)
 {
-    analogWrite(motorEna, 100);
+    EnaWrite(motorEna, Rmotor);
     digitalWrite(motorIn1, LOW);
     digitalWrite(motorIn2, HIGH);
 
-    analogWrite(motorEna_v, 100);
+    EnbgWrite(motorEna_v, Rmotor);
     digitalWrite(motorIn1_v, HIGH);
     digitalWrite(motorIn2_v, LOW);
 }
@@ -172,6 +188,19 @@ void estadoAutonomo()
             valor_doblar++;
         }
     }
+}
+void bailar()
+{
+    for (int angulo = 0; angulo <= 255; angulo++)
+    {
+        ServoWrite(canal0, angulo)
+    }
+    for (int angulo = 0; angulo <= 255; angulo--)
+    {
+        ServoWrite(canal0, angulo)
+    }
+    giroderecha(P_M_IZQ_ENA, P_M_IZQ_IN1, P_M_IZQ_IN2, P_M_DER_ENB, P_M_DER_IN3, P_M_DER_IN4);
+
 }
 
 int lecturaComandos(string cmd)
