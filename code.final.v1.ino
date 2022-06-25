@@ -1,7 +1,8 @@
+
 // librerias
-#include <wifi.h>
-#include <wall-e app.h>
+#include <WiFi.h>
 #include <FirebaseESP32.h>
+//#include <wall-e app.h>
 // instalar libreria de wifi en caso de ser necesario
 //  instalar firebase esp32 client
 /*
@@ -11,7 +12,7 @@ explicacion: P_(pin),M_(motor),DER(DERECHA),IZQ(IZQUIERDA),
 #define SSDI "XXX"                                            // NOMBRE DE RED
 #define PASS "XXX"                                            // PASSWORD DE RED
 #define URL "wall-e-app-default-rtdb.firebaseio.com"          // URL DE FIREBASE
-#define secretbase "zHQFVPY4ZS7Ay0wrOeiWTKbhXTySFRXwKasZ0H4f" // SECRET DE FIREBASE
+#define SECRETBASE "zHQFVPY4ZS7Ay0wrOeiWTKbhXTySFRXwKasZ0H4f" // SECRET DE FIREBASE
 // CONSTANTES DE DISTANCIA
 #define DISTANCIA_MIN 15
 // DECLARAMOS PINES DE ULTRA SONIDO
@@ -34,7 +35,7 @@ int canal0 = 0;        // canal pwm para el servo motor
 int canal1 = 1;        // canal pwm para el motor
 int Rmotor = 100;      // resolucion motor
 // fire base
-firebaseData myFirebaseData;
+FirebaseData myFirebaseData;
 
 // INFORMACION DE DISTNCIA RECOLECTADA POR LOS Sensores
 int sensor_arriba;
@@ -42,10 +43,10 @@ int sensor_abajo;
 int tiempoAc = 0;
 int periodo4 = 4000;
 int periodo2 = 2000;
-int pin_motores[5] =
+int pin_motores[6] =
     {P_M_IZQ_ENA, P_M_IZQ_IN1, P_M_IZQ_IN2,
      P_M_DER_ENB, P_M_DER_IN3, P_M_DER_IN4};
-enum estadoWalle = {
+enum ESTADOWALLE  {
     ESTADO_BAILE = 75,
     ESTADO_RECOLECTAR = 100,
     ESTADO_QUIETO = 170,
@@ -53,26 +54,17 @@ enum estadoWalle = {
     ESTADO_CONTROL_ADELANTE = 550,
     ESTADO_CONTROL_ATRAS = 600,
     ESTADO_CONTROL_IZQUIERDA = 700,
-    ESTADO_CONTROL_DERECHA = 650,
-    ACTIVAR_CAMARA = 750,
-    DESACTIVAR_CAMARA = 0,
+    ESTADO_CONTROL_DERECHA = 650
 };
 int valor_doblar;
-void conexionWifiBaseData(int ssdi, int pass, int url, int secret)
-{
-    // CONECTAR A WIFI
-    WiFi.begin(ssdi, pass);
-    firebasae.begin(url, secret);
-    firebase.reconnectWiFi(true);
-}
 void DeclaracionPwm()
 {
-    EnaSetup(canal1, frecuencia, Rmotor);
-    EnbSetup(canal1, frecuencia, Rmotor);
-    ServoSetup(canal0, frecuencia, Rmotor);
-    Ena.AttachPin(P_M_IZQ_ENA, canal1);
-    Enb.AttachPin(P_M_DER_ENB, canal1);
-    Servo.AttachPin(SERVO, canal0);
+    ledcSetup(canal1, frecuencia, Rmotor);
+   ledcSetup(canal1, frecuencia, Rmotor);
+    ledcSetup(canal0, frecuencia, Rmotor);
+    ledcAttachPin(P_M_IZQ_ENA, canal1);
+    ledcAttachPin(P_M_DER_ENB, canal1);
+    ledcAttachPin(SERVO, canal0);
 }
 void asignacionMotores(int pin_motores_v[])
 {
@@ -90,13 +82,15 @@ void pinesUltrasonido(int trig, int eco_abajo, int eco_arriba)
     pinMode(eco_arriba, INPUT);
 }
 void setup()
-{
+{   DeclaracionPwm();
     // pinMode DE ULTRASONIDOS
     pinesUltrasonido(P_TRIG, PIN_ECO_ABAJO, PIN_ECO_ARRIBA);
     // pin mode de motores
     asignacionMotores(pin_motores);
     // CONECTAR A WIFI
-    conexionWifiBaseData(SSDI, PASS, URL, secretbase);
+     WiFi.begin(SSDI,PASS);
+    Firebase.begin(URL,SECRETBASE);
+    Firebase.reconnectWiFi(true);
 }
 // FUNCIOS DE RECOLECCION DE DATOS DE LOS Sensores
 int Sensores(int PIN_TRIG, int PIN_ECO)
@@ -120,42 +114,42 @@ int Sensores(int PIN_TRIG, int PIN_ECO)
 // FUNCIOS PARA MOVER LOS MOTORES PARA ADELANTE
 void motoresAdelante(int motorEna, int motorIn1, int motorIn2, int motorEna_v, int motorIn1_v, int motorIn2_v)
 {
-    EnaWrite(motorEna, Rmotor);
+    ledcWrite(motorEna, Rmotor);
     digitalWrite(motorIn1, LOW);
     digitalWrite(motorIn2, HIGH);
 
-    EnbgWrite(motorEna_v, Rmotor);
+    ledcWrite(motorEna_v, Rmotor);
     digitalWrite(motorIn1_v, LOW);
     digitalWrite(motorIn2_v, HIGH);
 }
 void motoresAtras(int motorEna, int motorIn1, int motorIn2, int motorEna_v, int motorIn1_v, int motorIn2_v)
 {
-    EnaWrite(motorEna, Rmotor);
+    ledcWrite(motorEna, Rmotor);
     digitalWrite(motorIn1, HIGH);
     digitalWrite(motorIn2, LOW);
 
-    EnbgWrite(motorEna_v, Rmotor);
+    ledcWrite(motorEna_v, Rmotor);
     digitalWrite(motorIn1_v, HIGH);
     digitalWrite(motorIn2_v, LOW);
 }
 // FUNCIOS DE DOBLAR A LA DERECHA INVIRTIENDO UN MOTOR FUNCION MOTOR IZQUIERDO
 void giroizquierda(int motorEna, int motorIn1, int motorIn2, int motorEna_v, int motorIn1_v, int motorIn2_v)
 {
-    EnaWrite(motorEna, Rmotor);
+    ledcWrite(motorEna, Rmotor);
     digitalWrite(motorIn1, HIGH);
     digitalWrite(motorIn2, LOW);
 
-    EnbgWrite(motorEna_v, Rmotor);
+    ledcWrite(motorEna_v, Rmotor);
     digitalWrite(motorIn1_v, LOW);
     digitalWrite(motorIn2_v, HIGH);
 }
 void giroderecha(int motorEna, int motorIn1, int motorIn2, int motorEna_v, int motorIn1_v, int motorIn2_v)
 {
-    EnaWrite(motorEna, Rmotor);
+    ledcWrite(motorEna, Rmotor);
     digitalWrite(motorIn1, LOW);
     digitalWrite(motorIn2, HIGH);
 
-    EnbgWrite(motorEna_v, Rmotor);
+    ledcWrite(motorEna_v, Rmotor);
     digitalWrite(motorIn1_v, HIGH);
     digitalWrite(motorIn2_v, LOW);
 }
@@ -193,25 +187,25 @@ void bailar()
 {
     for (int angulo = 0; angulo <= 255; angulo++)
     {
-        ServoWrite(canal0, angulo)
+        ledcWrite(canal0, angulo);
     }
     for (int angulo = 0; angulo <= 255; angulo--)
     {
-        ServoWrite(canal0, angulo)
+        ledcWrite(canal0, angulo);
     }
     giroderecha(P_M_IZQ_ENA, P_M_IZQ_IN1, P_M_IZQ_IN2, P_M_DER_ENB, P_M_DER_IN3, P_M_DER_IN4);
 
 }
 
-int lecturaComandos(string cmd)
+int lecturaComandos(String cmd)
 {
-    Firebase.get(firebase, "/cmd");
-    return myFireBaseData.IntData;
+  Firebase.get(myFirebaseData, "/cmd");
+    return myFirebaseData.intData(); ;
 }
 
 void standby()
 {
-    Firebase.set(myFireBaseData, "/COMANDOS", 0);
+    Firebase.set(myFirebaseData, "/COMANDOS", 0);
 }
 
 void movimiento(int estado)
@@ -290,6 +284,6 @@ void movimiento(int estado)
 // LOOP
 void loop()
 {
-    int cmdMov = lecturaComandos(COMANDOS);
-    void movimiento(cmdMov);
+    int cmdMov = lecturaComandos("COMANDOS");
+    movimiento(cmdMov);
 }
