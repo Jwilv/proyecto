@@ -9,8 +9,8 @@
 explicacion: P_(pin),M_(motor),DER(DERECHA),IZQ(IZQUIERDA),
 */
 
-#define SSDI "XXX"                                            // NOMBRE DE RED
-#define PASS "XXX"                                            // PASSWORD DE RED
+#define SSDI "Estudiantes"                                            // NOMBRE DE RED
+#define PASS "educar_2018"                                            // PASSWORD DE RED
 #define URL "wall-e-app-default-rtdb.firebaseio.com"          // URL DE FIREBASE
 #define SECRETBASE "zHQFVPY4ZS7Ay0wrOeiWTKbhXTySFRXwKasZ0H4f" // SECRET DE FIREBASE
 // CONSTANTES DE DISTANCIA
@@ -41,12 +41,15 @@ FirebaseData myFirebaseData;
 int sensor_arriba;
 int sensor_abajo;
 int tiempoAc = 0;
+int periodo = 20;
+ unsigned long tiempo_actual;
 int periodo4 = 4000;
 int periodo2 = 2000;
 int pin_motores[6] =
     {P_M_IZQ_ENA, P_M_IZQ_IN1, P_M_IZQ_IN2,
      P_M_DER_ENB, P_M_DER_IN3, P_M_DER_IN4};
-enum ESTADOWALLE  {
+enum ESTADOWALLE
+{
     ESTADO_BAILE = 75,
     ESTADO_RECOLECTAR = 100,
     ESTADO_QUIETO = 170,
@@ -60,7 +63,7 @@ int valor_doblar;
 void DeclaracionPwm()
 {
     ledcSetup(canal1, frecuencia, Rmotor);
-   ledcSetup(canal1, frecuencia, Rmotor);
+    ledcSetup(canal1, frecuencia, Rmotor);
     ledcSetup(canal0, frecuencia, Rmotor);
     ledcAttachPin(P_M_IZQ_ENA, canal1);
     ledcAttachPin(P_M_DER_ENB, canal1);
@@ -81,35 +84,38 @@ void pinesUltrasonido(int trig, int eco_abajo, int eco_arriba)
     pinMode(eco_abajo, INPUT);
     pinMode(eco_arriba, INPUT);
 }
-void setup()
-{   DeclaracionPwm();
-    // pinMode DE ULTRASONIDOS
-    pinesUltrasonido(P_TRIG, PIN_ECO_ABAJO, PIN_ECO_ARRIBA);
-    // pin mode de motores
-    asignacionMotores(pin_motores);
-    // CONECTAR A WIFI
-     WiFi.begin(SSDI,PASS);
-    Firebase.begin(URL,SECRETBASE);
-    Firebase.reconnectWiFi(true);
-}
+
 // FUNCIOS DE RECOLECCION DE DATOS DE LOS Sensores
 int Sensores(int PIN_TRIG, int PIN_ECO)
 {
     int distancia;
     int duracion;
-    int periodo = 20;
-    unsigned long tiempo_actual;
-    if (millis() > tiempo_actual + periodo)
-    {
-        tiempo_actual = millis();
-        // SENSOR
-        digitalWrite(PIN_TRIG, HIGH);
-        delayMicroseconds(15);
-        digitalWrite(PIN_TRIG, LOW);
-        duracion = pulseIn(PIN_ECO, HIGH);
-        distancia = duracion / 58.2;
-        return distancia;
-    }
+    
+   
+
+    //<--------------------------------------- Esto esta mal!
+    // ya que por X segundos la funcion no esta retornada!
+    // aca solo deberia estar la logica de leer el sensor,
+    // el millis no tiene nada que ver con la lectura de sensores
+    //
+    //
+    // En todo caso deberia ser ser el millis que llama a la lectura de senreos
+    // Ejemplo:
+    //
+
+    // if (millis() > tiempo_actual + periodo){
+    //     s1=Sensores(2,3);
+    //     s2=Sensores(2,3);
+    //     s3=Sensores(2,3);
+    // }
+    tiempo_actual = millis();
+    // SENSOR
+    digitalWrite(PIN_TRIG, HIGH);
+    delayMicroseconds(15);
+    digitalWrite(PIN_TRIG, LOW);
+    duracion = pulseIn(PIN_ECO, HIGH);
+    distancia = duracion / 58.2;
+    return distancia;
 }
 // FUNCIOS PARA MOVER LOS MOTORES PARA ADELANTE
 void motoresAdelante(int motorEna, int motorIn1, int motorIn2, int motorEna_v, int motorIn1_v, int motorIn2_v)
@@ -158,8 +164,12 @@ void giroderecha(int motorEna, int motorIn1, int motorIn2, int motorEna_v, int m
 void estadoAutonomo()
 {
     // DISTANCIA DE RECOLECCION DE DATOS
-    int sensor_arriba = Sensores(P_TRIG, PIN_ECO_ARRIBA);
-    int sensor_abajo = Sensores(P_TRIG, PIN_ECO_ABAJO);
+    if (millis() > tiempo_actual + periodo)
+    {
+        int sensor_arriba = Sensores(P_TRIG, PIN_ECO_ARRIBA);
+        int sensor_abajo = Sensores(P_TRIG, PIN_ECO_ABAJO);
+    }
+
     // CONDICIONES PARA MOVIMIENTO AUTONOMO
     bool moverse_adelante = sensor_arriba > DISTANCIA_MIN && sensor_abajo > DISTANCIA_MIN;
     bool doblar = sensor_arriba <= DISTANCIA_MIN;
@@ -194,13 +204,12 @@ void bailar()
         ledcWrite(canal0, angulo);
     }
     giroderecha(P_M_IZQ_ENA, P_M_IZQ_IN1, P_M_IZQ_IN2, P_M_DER_ENB, P_M_DER_IN3, P_M_DER_IN4);
-
 }
 
 int lecturaComandos(String cmd)
 {
-  Firebase.get(myFirebaseData, "/cmd");
-    return myFirebaseData.intData(); ;
+    Firebase.get(myFirebaseData, "/cmd");
+    return myFirebaseData.intData(); // aca tenes 2doble ;<-------------------------------------------------------------------
 }
 
 void standby()
@@ -220,6 +229,7 @@ void movimiento(int estado)
             tiempoAc = millis();
             standby();
         }
+        break; //<--------------------------------------- ACA NO FALTA un "BREAK"????
     }
     case ESTADO_CONTROL_ATRAS:
     {
@@ -229,6 +239,7 @@ void movimiento(int estado)
             tiempoAc = millis();
             standby();
         }
+        break; //<--------------------------------------- ACA NO FALTA un "BREAK"????
     }
     case ESTADO_CONTROL_IZQUIERDA:
     {
@@ -238,6 +249,7 @@ void movimiento(int estado)
             tiempoAc = millis();
             standby();
         }
+        break; //<--------------------------------------- ACA NO FALTA un "BREAK"????
     }
     case ESTADO_CONTROL_DERECHA:
     {
@@ -247,6 +259,7 @@ void movimiento(int estado)
             tiempoAc = millis();
             standby();
         }
+        break; //<--------------------------------------- ACA NO FALTA un "BREAK"????
     }
     case ESTADO_BAILE:
     {
@@ -279,6 +292,18 @@ void movimiento(int estado)
         break;
     }
     }
+}
+void setup() //<--------------------------------------- Esto deberia estar abajo de todo con el Loop
+{
+    DeclaracionPwm();
+    // pinMode DE ULTRASONIDOS
+    pinesUltrasonido(P_TRIG, PIN_ECO_ABAJO, PIN_ECO_ARRIBA);
+    // pin mode de motores
+    asignacionMotores(pin_motores);
+    // CONECTAR A WIFI
+    WiFi.begin(SSDI, PASS);
+    Firebase.begin(URL, SECRETBASE);
+    Firebase.reconnectWiFi(true);
 }
 
 // LOOP
