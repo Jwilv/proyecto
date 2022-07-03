@@ -63,7 +63,6 @@ int valor_doblar;
 void DeclaracionPwm()
 {
     ledcSetup(canal1, frecuencia, Rmotor);
-    ledcSetup(canal1, frecuencia, Rmotor);
     ledcSetup(canal0, frecuencia, Rmotor);
     ledcAttachPin(P_M_IZQ_ENA, canal1);
     ledcAttachPin(P_M_DER_ENB, canal1);
