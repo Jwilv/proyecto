@@ -90,24 +90,6 @@ int Sensores(int PIN_TRIG, int PIN_ECO)
 {
     int distancia;
     int duracion;
-    
-   
-
-    //<--------------------------------------- Esto esta mal!
-    // ya que por X segundos la funcion no esta retornada!
-    // aca solo deberia estar la logica de leer el sensor,
-    // el millis no tiene nada que ver con la lectura de sensores
-    //
-    //
-    // En todo caso deberia ser ser el millis que llama a la lectura de senreos
-    // Ejemplo:
-    //
-
-    // if (millis() > tiempo_actual + periodo){
-    //     s1=Sensores(2,3);
-    //     s2=Sensores(2,3);
-    //     s3=Sensores(2,3);
-    // }
     tiempo_actual = millis();
     // SENSOR
     digitalWrite(PIN_TRIG, HIGH);
@@ -209,7 +191,7 @@ void bailar()
 int lecturaComandos(String cmd)
 {
     Firebase.get(myFirebaseData, "/cmd");
-    return myFirebaseData.intData(); // aca tenes 2doble ;<-------------------------------------------------------------------
+    return myFirebaseData.intData();
 }
 
 void standby()
@@ -229,7 +211,7 @@ void movimiento(int estado)
             tiempoAc = millis();
             standby();
         }
-        break; //<--------------------------------------- ACA NO FALTA un "BREAK"????
+        break; 
     }
     case ESTADO_CONTROL_ATRAS:
     {
@@ -239,7 +221,7 @@ void movimiento(int estado)
             tiempoAc = millis();
             standby();
         }
-        break; //<--------------------------------------- ACA NO FALTA un "BREAK"????
+        break; 
     }
     case ESTADO_CONTROL_IZQUIERDA:
     {
@@ -249,7 +231,7 @@ void movimiento(int estado)
             tiempoAc = millis();
             standby();
         }
-        break; //<--------------------------------------- ACA NO FALTA un "BREAK"????
+        break; 
     }
     case ESTADO_CONTROL_DERECHA:
     {
@@ -259,7 +241,7 @@ void movimiento(int estado)
             tiempoAc = millis();
             standby();
         }
-        break; //<--------------------------------------- ACA NO FALTA un "BREAK"????
+        break; 
     }
     case ESTADO_BAILE:
     {
@@ -293,7 +275,7 @@ void movimiento(int estado)
     }
     }
 }
-void setup() //<--------------------------------------- Esto deberia estar abajo de todo con el Loop
+void setup()
 {
     DeclaracionPwm();
     // pinMode DE ULTRASONIDOS
