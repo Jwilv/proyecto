@@ -1,6 +1,7 @@
+#include <Arduino.h>
 
 // librerias
-#include <WiFi.h>
+//#include <WiFi.h>
 #include <FirebaseESP32.h>
 //#include <wall-e app.h>
 // instalar libreria de wifi en caso de ser necesario
@@ -8,6 +9,7 @@
 /*
 explicacion: P_(pin),M_(motor),DER(DERECHA),IZQ(IZQUIERDA),
 */
+#define DEBUG 1
 
 #define SSDI "Estudiantes"                                            // NOMBRE DE RED
 #define PASS "educar_2018"                                            // PASSWORD DE RED
@@ -203,7 +205,7 @@ void movimiento(int estado)
     switch (estado)
     {
     case ESTADO_CONTROL_ADELANTE:
-    {   Serial.print("adelante");
+    {   if (DEBUG)Serial.print("adelante");
         motoresAdelante(P_M_IZQ_ENA, P_M_IZQ_IN1, P_M_IZQ_IN2, P_M_DER_ENB, P_M_DER_IN3, P_M_DER_IN4);
        /* if (millis() - tiempoAc > periodo2)
         {
@@ -213,7 +215,7 @@ void movimiento(int estado)
         break; 
     }
     case ESTADO_CONTROL_ATRAS:
-    {   Serial.print("atras");
+    {   if (DEBUG)Serial.print("atras");
         motoresAtras(P_M_IZQ_ENA, P_M_IZQ_IN1, P_M_IZQ_IN2, P_M_DER_ENB, P_M_DER_IN3, P_M_DER_IN4);
        /* if (millis() - tiempoAc > periodo2)
         {
@@ -223,7 +225,7 @@ void movimiento(int estado)
         break; 
     }
     case ESTADO_CONTROL_IZQUIERDA:
-    {   Serial.print("izquiera");
+    {   if (DEBUG)Serial.print("izquiera");
         giroizquierda(P_M_IZQ_ENA, P_M_IZQ_IN1, P_M_IZQ_IN2, P_M_DER_ENB, P_M_DER_IN3, P_M_DER_IN4);
         /*if (millis() - tiempoAc > periodo2)
         {
@@ -233,7 +235,7 @@ void movimiento(int estado)
         break; 
     }
     case ESTADO_CONTROL_DERECHA:
-    {   Serial.print("derecha");
+    {   if (DEBUG)Serial.print("derecha");
         giroderecha(P_M_IZQ_ENA, P_M_IZQ_IN1, P_M_IZQ_IN2, P_M_DER_ENB, P_M_DER_IN3, P_M_DER_IN4);
        /* if (millis() - tiempoAc > periodo2)
         {
@@ -243,7 +245,7 @@ void movimiento(int estado)
         break; 
     }
     case ESTADO_BAILE:
-    {   Serial.print("baile");
+    {   if (DEBUG)Serial.print("baile");
         bailar();
        /* if (millis() - tiempoAc > periodo4)
         {
@@ -253,14 +255,14 @@ void movimiento(int estado)
         break;
     }
     case ESTADO_QUIETO:
-    {   Serial.print("quieto");
+    {   if (DEBUG)Serial.print("quieto");
         /*standby();*/
         break;
     }
     case ESTADO_TROMPO:
     {
         giroderecha(P_M_IZQ_ENA, P_M_IZQ_IN1, P_M_IZQ_IN2, P_M_DER_ENB, P_M_DER_IN3, P_M_DER_IN4);
-        Serial.print("trompo");
+        if (DEBUG)Serial.print("trompo");
        /* if (millis() - tiempoAc > periodo4)
         {
             tiempoAc = millis();
@@ -269,7 +271,7 @@ void movimiento(int estado)
         break;
     }
     case ESTADO_RECOLECTAR:
-    {   Serial.print("recolectar");
+    { if (DEBUG)Serial.print("recolectar");
         estadoAutonomo();
         break;
     }
@@ -292,6 +294,7 @@ void setup()
 void loop()
 {
     int cmdMov = lecturaComandos();
-    //Serial.println(cmdMov);
+    if (DEBUG)Serial.println(cmdMov);  
     movimiento(cmdMov);
+
 }
